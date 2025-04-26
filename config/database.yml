@@ -9,12 +9,12 @@ default: &default
   checkout_timeout: 10
 development:
   <<: *default
-  database: zigexn_vn_2025_be_development
+  database: moc_2025_be_development
 
 test:
   <<: *default
-  database: zigexn_vn_2025_be_test
+  database: moc_2025_be_test
 
 production:
   <<: *default
-  database: zigexn_vn_2025_be_production
+  database: moc_2025_be_production
