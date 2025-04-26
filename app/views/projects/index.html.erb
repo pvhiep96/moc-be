@@ -104,7 +104,10 @@
                       <%= link_to edit_project_path(project), class: 'btn btn-sm btn-outline-warning' do %>
                         <i class="fas fa-edit"></i>
                       <% end %>
-                      <%= link_to project, method: :delete, data: { confirm: 'Bạn có chắc chắn muốn xóa?' }, class: 'btn btn-sm btn-outline-danger' do %>
+                      <%= button_to project_path(project), 
+                          method: :delete, 
+                          class: 'btn btn-sm btn-outline-danger',
+                          form: { data: { turbo_confirm: 'Bạn có chắc chắn muốn xóa?' } } do %>
                         <i class="fas fa-trash"></i>
                       <% end %>
                     </div>
@@ -126,7 +129,10 @@
                           <i class="fas fa-edit me-2 text-warning"></i> Chỉnh sửa
                         <% end %>
                         <div class="dropdown-divider"></div>
-                        <%= link_to project, method: :delete, data: { confirm: 'Bạn có chắc chắn muốn xóa?' }, class: 'dropdown-item text-danger' do %>
+                        <%= button_to project_path(project),
+                            method: :delete,
+                            class: 'dropdown-item text-danger',
+                            form: { data: { turbo_confirm: 'Bạn có chắc chắn muốn xóa?' } } do %>
                           <i class="fas fa-trash me-2"></i> Xóa dự án
                         <% end %>
                       </ul>
