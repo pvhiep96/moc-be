@@ -13,6 +13,4 @@ Rails.application.routes.draw do
   # API routes
   mount Api::Base, at: '/api'
   mount GrapeSwaggerRails::Engine => '/swagger'
-
-  root to: 'projects#index'
 end
