@@ -5,17 +5,25 @@ set -e
 
 # Function to wait for dependent containers
 wait_for_db() {
-    # /wait-for-it.sh db:3306
-    echo "Waiting for the database to be ready..."
+    echo "Waiting for PostgreSQL to be ready..."
+    # Wait for PostgreSQL to be ready
+    while ! nc -z db 5432; do
+      sleep 1
+    done
+    echo "PostgreSQL is ready!"
 }
 
 # Function to setup the database
 setup_database() {
-    # Check if the database exists
-    if ! bundle exec rails db:version; then
-        bundle exec rake db:create
+    echo "Setting up database..."
+    # Create database if it doesn't exist
+    bundle exec rails db:create || true
+    # Run migrations
+    bundle exec rails db:migrate
+    # Run seeds if in development
+    if [ "$RAILS_ENV" = "development" ]; then
+        bundle exec rails db:seed
     fi
-    bundle exec rake db:migrate
 }
 
 # Main execution
