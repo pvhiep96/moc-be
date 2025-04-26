@@ -26,8 +26,6 @@
 .env.*
 !.env.example
 
-# Ignore database configuration
-/config/database.yml
 
 # Ignore coverage reports
 /coverage/*
