@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><%= link_to 'Trang chủ', root_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
+        <li class="breadcrumb-item active" aria-current="page">Thêm mới</li>
+      </ol>
+    </nav>
+    <h2 class="mt-2 mb-0 fw-bold">Thêm dự án mới</h2>
+  </div>
+  <div class="d-none d-md-block">
+    <img src="https://cdn-icons-png.flaticon.com/512/3588/3588614.png" alt="Studio" style="height: 80px; opacity: 0.8;">
+  </div>
+</div>
+
+<div class="card shadow border-0 overflow-hidden">
+  <div class="card-header p-0">
+    <div class="bg-primary text-white px-4 py-3" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Tạo bộ sưu tập hình ảnh/video mới</h4>
+      </div>
+      <p class="mb-0 mt-2 opacity-75 small">Điền đầy đủ thông tin bên dưới để tạo một dự án mới cho studio</p>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="p-4">
+      <%= render 'form', project: @project %>
+    </div>
+  </div>
+</div>

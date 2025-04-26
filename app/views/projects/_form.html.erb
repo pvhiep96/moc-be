@@ -1,0 +1,192 @@
+<%= form_with(model: project, local: true) do |form| %>
+  <% if project.errors.any? %>
+    <div class="alert alert-danger shadow-sm border-0">
+      <h4><i class="fas fa-exclamation-triangle me-2"></i><%= pluralize(project.errors.count, "lỗi") %> đã ngăn cản lưu dự án này:</h4>
+      <ul>
+        <% project.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-primary text-white" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;">
+      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin dự án</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <%= form.label :name, "Tên dự án", class: "form-label fw-bold" %>
+            <div class="input-group shadow-sm">
+              <%= form.text_field :name, class: 'form-control', placeholder: "Nhập tên dự án" %>
+            </div>
+            <small class="text-muted">Tên dự án sẽ hiển thị trên trang chủ</small>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group mb-3">
+            <%= form.label :drive_id, "ID Google Drive", class: "form-label fw-bold" %>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-light border-end-0"><i class="fab fa-google-drive text-danger"></i></span>
+              <%= form.text_field :drive_id, class: 'form-control border-start-0', placeholder: "Nhập ID thư mục Google Drive", style: "padding-left: 0;" %>
+            </div>
+            <small class="text-muted">ID thư mục Drive sử dụng để lấy hình ảnh tự động</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group mt-3 p-3 bg-light rounded-3 shadow-sm">
+        <div class="form-check form-switch">
+          <%= form.check_box :show_video, class: 'form-check-input' %>
+          <%= form.label :show_video, "Hiển thị video thay cho ảnh ở trang chủ", class: "form-check-label fw-bold" %>
+        </div>
+        <small class="text-muted d-block mt-1">Khi bật tùy chọn này, video đầu tiên sẽ được hiển thị thay vì ảnh ở trang chủ</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video URLs section -->
+  <div class="card mb-4 shadow-sm border-0" data-controller="nested-form">
+    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0dcaf0, #6f42c1) !important; color: white;">
+      <h5 class="mb-0"><i class="fas fa-film me-2"></i>Đường dẫn Video</h5>
+      <button type="button" data-action="click->nested-form#add" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px);">
+        <i class="fas fa-plus me-1"></i> Thêm video
+      </button>
+    </div>
+    <div class="card-body bg-light">
+      <template data-nested-form-target="template">
+        <%= form.fields_for :video_urls, VideoUrl.new, child_index: 'NEW_RECORD' do |video_url| %>
+          <div class="nested-fields card mb-3 shadow-sm border-0" data-new-record="true">
+            <div class="card-body">
+              <div class="input-group">
+                <span class="input-group-text border-end-0 bg-white"><i class="fas fa-link text-info"></i></span>
+                <%= video_url.text_field :url, class: 'form-control border-start-0 border-end-0', placeholder: "Nhập đường dẫn video (YouTube, Vimeo,...)", style: "padding-left: 0;" %>
+                <button type="button" data-action="click->nested-form#remove" class="btn btn-outline-danger border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  <i class="fas fa-trash-alt me-1"></i> Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </template>
+      
+      <div data-nested-form-target="container">
+        <%= form.fields_for :video_urls do |video_url| %>
+          <div class="nested-fields card mb-3 shadow-sm border-0">
+            <div class="card-body">
+              <div class="input-group">
+                <span class="input-group-text border-end-0 bg-white"><i class="fas fa-link text-info"></i></span>
+                <%= video_url.text_field :url, class: 'form-control border-start-0 border-end-0', placeholder: "Nhập đường dẫn video (YouTube, Vimeo,...)", style: "padding-left: 0;" %>
+                <%= video_url.hidden_field :_destroy %>
+                <button type="button" data-action="click->nested-form#remove" class="btn btn-outline-danger border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                  <i class="fas fa-trash-alt me-1"></i> Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if project.video_urls.empty? %>
+        <div class="text-center py-4 px-3 rounded-3" style="background-color: rgba(255,255,255,0.5);">
+          <div class="d-inline-block p-3 mb-3 rounded-circle bg-white shadow-sm">
+            <i class="fas fa-film fa-2x text-info"></i>
+          </div>
+          <p class="text-muted mb-2">Chưa có đường dẫn video nào.</p>
+          <button type="button" data-action="click->nested-form#add" class="btn btn-sm btn-info">
+            <i class="fas fa-plus-circle me-1"></i> Thêm video đầu tiên
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Descriptions section -->
+  <div class="card mb-4 shadow-sm border-0" data-controller="nested-form">
+    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #20c997, #0dcaf0) !important; color: white;">
+      <h5 class="mb-0"><i class="fas fa-align-left me-2"></i>Nội dung mô tả</h5>
+      <button type="button" data-action="click->nested-form#add" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px);">
+        <i class="fas fa-plus me-1"></i> Thêm mô tả
+      </button>
+    </div>
+    <div class="card-body bg-light">
+      <template data-nested-form-target="template">
+        <%= form.fields_for :descriptions, Description.new, child_index: 'NEW_RECORD' do |description| %>
+          <div class="nested-fields card mb-3 shadow-sm border-0" data-new-record="true">
+            <div class="card-header bg-white py-3 border-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <div class="input-group shadow-sm" style="width: 150px;">
+                    <span class="input-group-text border-end-0 bg-white"><i class="fas fa-sort-numeric-down text-success"></i></span>
+                    <%= description.number_field :position_display, class: 'form-control border-start-0', placeholder: "Vị trí", style: "padding-left: 0;" %>
+                  </div>
+                  <div class="ms-2">
+                    <span class="badge bg-info">Thứ tự hiển thị</span>
+                  </div>
+                </div>
+                <button type="button" data-action="click->nested-form#remove" class="btn btn-sm btn-outline-danger">
+                  <i class="fas fa-trash-alt me-1"></i> Xóa mục này
+                </button>
+              </div>
+            </div>
+            <div class="card-body pt-0">
+              <%= description.text_area :content, id: "description_content_#{Time.now.to_i}_#{rand(1000)}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
+            </div>
+          </div>
+        <% end %>
+      </template>
+      
+      <div data-nested-form-target="container">
+        <%= form.fields_for :descriptions do |description| %>
+          <div class="nested-fields card mb-3 shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <div class="input-group shadow-sm" style="width: 150px;">
+                    <span class="input-group-text border-end-0 bg-white"><i class="fas fa-sort-numeric-down text-success"></i></span>
+                    <%= description.number_field :position_display, class: 'form-control border-start-0', placeholder: "Vị trí", style: "padding-left: 0;" %>
+                  </div>
+                  <div class="ms-2">
+                    <span class="badge bg-info">Thứ tự hiển thị</span>
+                  </div>
+                </div>
+                <div>
+                  <%= description.hidden_field :_destroy %>
+                  <button type="button" data-action="click->nested-form#remove" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Xóa mục này
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body pt-0">
+              <%= description.text_area :content, id: "description_content_#{description.object.id || "new_#{Time.now.to_i}_#{rand(1000)}"}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <% if project.descriptions.empty? %>
+        <div class="text-center py-4 px-3 rounded-3" style="background-color: rgba(255,255,255,0.5);">
+          <div class="d-inline-block p-3 mb-3 rounded-circle bg-white shadow-sm">
+            <i class="fas fa-align-left fa-2x text-success"></i>
+          </div>
+          <p class="text-muted mb-2">Chưa có nội dung mô tả nào cho dự án này.</p>
+          <button type="button" data-action="click->nested-form#add" class="btn btn-sm btn-success">
+            <i class="fas fa-plus-circle me-1"></i> Thêm nội dung mô tả
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <%= link_to projects_path, class: 'btn btn-secondary shadow-sm' do %>
+      <i class="fas fa-arrow-left me-1"></i> Quay lại
+    <% end %>
+    <button type="submit" class="btn btn-primary shadow-sm" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0); border: none;">
+      <i class="fas fa-save me-1"></i> <%= project.new_record? ? "Tạo dự án" : "Cập nhật dự án" %>
+    </button>
+  </div>
+<% end %> 

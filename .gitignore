@@ -1,0 +1,77 @@
+# Ignore bundler config and gems
+/.bundle
+/vendor/bundle
+
+# Ignore all logfiles and tempfiles
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.keep
+
+# Ignore uploaded files in development
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.keep
+
+# Ignore master key for decrypting credentials
+/config/master.key
+
+# Ignore environment variables
+.env
+.env.*
+!.env.example
+
+# Ignore database configuration
+/config/database.yml
+
+# Ignore coverage reports
+/coverage/*
+
+# Ignore node modules
+/node_modules
+
+# Ignore yarn files
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Ignore precompiled assets
+/public/assets
+/public/packs
+/public/packs-test
+
+# Ignore credentials files
+credentials.json
+*.key
+*.pem
+
+# Ignore Mac system files
+.DS_Store
+
+# Ignore RSpec and test files
+/spec/tmp
+.rspec
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignore cache files
+.sass-cache/
+/public/system
+
+# Ignore local secrets
+/tmp/local_secret.txt
+
+# Ignore Bootsnap cache
+/tmp/cache/bootsnap*
+
+credentials.json
+/credentials.json

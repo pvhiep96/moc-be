@@ -1,0 +1,187 @@
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><%= link_to 'Trang chủ', root_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
+        <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+      </ol>
+    </nav>
+    <h2 class="mt-2 mb-0"><%= @project.name %></h2>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to edit_project_path(@project), class: 'btn btn-warning' do %>
+      <i class="fas fa-edit me-1"></i> Chỉnh sửa
+    <% end %>
+    <% if @project.respond_to?(:reload_images) %>
+      <%= button_to reload_images_project_path(@project), method: :post, class: 'btn btn-info' do %>
+        <i class="fas fa-sync-alt me-1"></i> Tải lại hình ảnh
+      <% end %>
+    <% end %>
+    <%= link_to projects_path, class: 'btn btn-secondary' do %>
+      <i class="fas fa-arrow-left me-1"></i> Quay lại
+    <% end %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card mb-4 shadow-sm border-0">
+      <div class="card-header bg-primary text-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="d-flex align-items-center">
+              <p class="mb-0 fw-bold">Drive ID: <code class="text-white"><%= @project.drive_id %></code></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="nav nav-tabs mb-4" id="projectTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
+              <i class="fas fa-images me-2"></i>Hình ảnh <span class="badge rounded-pill bg-warning ms-1"><%= @project.images.count rescue 0 %></span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-controls="videos-content" aria-selected="false">
+              <i class="fas fa-video me-2"></i>Video URLs <span class="badge rounded-pill bg-info ms-1"><%= @project.video_urls.count %></span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
+              <i class="fas fa-file-alt me-2"></i>Mô tả <span class="badge rounded-pill bg-success ms-1"><%= @project.descriptions.count %></span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="projectTabContent">
+          <!-- Images Tab -->
+          <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
+            <% if @project.respond_to?(:images) && @project.images.present? %>
+              <div class="row g-3">
+                <% @project.images.each do |image| %>
+                  <div class="col-md-4 col-sm-6">
+                    <div class="card h-100">
+                      <img src="<%= image %>" class="card-img-top" alt="Project image">
+                      <div class="card-footer">
+                        <a href="<%= image %>" target="_blank" class="btn btn-sm btn-outline-primary d-block">
+                          <i class="fas fa-external-link-alt me-1"></i> Xem
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Chưa có hình ảnh nào được thêm vào.
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Videos Tab -->
+          <div class="tab-pane fade" id="videos-content" role="tabpanel" aria-labelledby="videos-tab">
+            <% if @project.video_urls.any? %>
+              <div class="list-group">
+                <% @project.video_urls.each do |video_url| %>
+                  <a href="<%= video_url.url %>" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                      <i class="fas fa-video me-2 text-danger"></i>
+                      <%= video_url.url %>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">
+                      <i class="fas fa-external-link-alt"></i>
+                    </span>
+                  </a>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Chưa có Video URL nào được thêm vào.
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Descriptions Tab -->
+          <div class="tab-pane fade" id="descriptions-content" role="tabpanel" aria-labelledby="descriptions-tab">
+            <% if @project.descriptions.order(:position_display).any? %>
+              <div class="accordion" id="descriptionsAccordion">
+                <% @project.descriptions.order(:position_display).each_with_index do |description, index| %>
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading<%= index %>">
+                      <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= index %>" aria-expanded="<%= index == 0 ? 'true' : 'false' %>" aria-controls="collapse<%= index %>">
+                        <span class="badge bg-primary me-2"><%= description.position_display %></span> Nội dung mô tả
+                      </button>
+                    </h2>
+                    <div id="collapse<%= index %>" class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" aria-labelledby="heading<%= index %>" data-bs-parent="#descriptionsAccordion">
+                      <div class="accordion-body">
+                        <%= description.content.html_safe %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Chưa có mô tả nào được thêm vào.
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-4">
+    <div class="card mb-4 shadow-sm border-0 sticky-top" style="top: 1rem; z-index: 1;">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Thao tác</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <%= link_to edit_project_path(@project), class: 'btn btn-warning' do %>
+            <i class="fas fa-edit me-1"></i> Chỉnh sửa dự án
+          <% end %>
+          
+          <%= link_to project_path(@project), method: :delete, data: { confirm: 'Bạn có chắc chắn muốn xóa?' }, class: 'btn btn-danger' do %>
+            <i class="fas fa-trash me-1"></i> Xóa dự án
+          <% end %>
+          
+          <%= link_to projects_path, class: 'btn btn-secondary' do %>
+            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4 shadow-sm border-0">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin dự án</h5>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-id-card me-2"></i>ID:</span>
+            <span class="badge bg-secondary"><%= @project.id %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-video me-2"></i>Video URLs:</span>
+            <span class="badge bg-info rounded-pill"><%= @project.video_urls.count %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-file-alt me-2"></i>Mô tả:</span>
+            <span class="badge bg-success rounded-pill"><%= @project.descriptions.count %></span>
+          </li>
+          <% if @project.respond_to?(:images) %>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="fas fa-images me-2"></i>Hình ảnh:</span>
+              <span class="badge bg-warning rounded-pill"><%= @project.images.count rescue 0 %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
