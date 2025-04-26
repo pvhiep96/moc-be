@@ -132,7 +132,7 @@
               </div>
             </div>
             <div class="card-body pt-0">
-              <%= description.text_area :content, id: "description_content_#{Time.now.to_i}_#{rand(1000)}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
+              <%= description.text_area :content, id: "description_content_new_#{Time.now.to_i}_#{rand(1000)}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
             </div>
           </div>
         <% end %>
@@ -161,7 +161,7 @@
               </div>
             </div>
             <div class="card-body pt-0">
-              <%= description.text_area :content, id: "description_content_#{description.object.id || "new_#{Time.now.to_i}_#{rand(1000)}"}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
+              <%= description.text_area :content, id: "description_content_#{description.object.id || "existing_#{Time.now.to_i}_#{rand(1000)}"}", rows: 5, class: 'form-control shadow-sm border tinymce tinymce-active', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
             </div>
           </div>
         <% end %>
