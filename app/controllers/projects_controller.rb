@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
-  before_action :require_admin
-  before_action :set_project, only: %i[show edit update destroy reload_images]
+  before_action :require_admin, except: %i[index show]
+  before_action :set_project, only: %i[show edit update destroy reload_images manage_images update_images]
 
   def index
     @projects = Project.all
@@ -54,10 +54,49 @@ class ProjectsController < ApplicationController
     redirect_to @project, notice: 'Images have been successfully reloaded from Google Drive.'
   end
 
+  # Action để quản lý ảnh hiển thị
+  def manage_images
+    @project_images = @project.project_images
+
+    # Lấy danh sách ID ảnh đã được chọn hiển thị
+    @selected_image_ids = @project.content_positions
+                                  .where(positionable_type: 'ProjectImage')
+                                  .order(:position)
+                                  .pluck(:positionable_id)
+
+    # Đánh dấu các ảnh đã được chọn
+    @project_images.each do |image|
+      image.display = @selected_image_ids.include?(image.id)
+    end
+  end
+
+  # Action để cập nhật ảnh hiển thị
+  def update_images
+    selected_image_ids = params[:selected_images] || []
+
+    ActiveRecord::Base.transaction do
+      # Xóa tất cả các content_position hiện tại của project cho ảnh
+      @project.content_positions.where(positionable_type: 'ProjectImage').destroy_all
+
+      # Tạo mới các content_position dựa trên dữ liệu gửi lên
+      selected_image_ids.each_with_index do |image_id, index|
+        @project.content_positions.create!(
+          positionable_type: 'ProjectImage',
+          positionable_id: image_id,
+          position: index
+        )
+      end
+    end
+
+    redirect_to @project, notice: 'Danh sách ảnh hiển thị đã được cập nhật thành công.'
+  end
+
   private
 
   def set_project
     @project = Project.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to projects_path, alert: 'Dự án không tồn tại.'
   end
 
   def project_params
@@ -69,5 +108,11 @@ class ProjectsController < ApplicationController
       video_vertical_attributes: %i[id url _destroy],
       descriptions_attributes: %i[id content position_display _destroy]
     )
+  end
+
+  def require_admin
+    return if admin_logged_in?
+
+    redirect_to login_path, alert: 'Bạn cần đăng nhập để thực hiện hành động này.'
   end
 end

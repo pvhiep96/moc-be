@@ -9,20 +9,22 @@ module Api
       expose :show_video
 
       expose :cover_image do |project, _options|
-        project.images.first if project.images.present?
+        project.displayed_images.first&.image_url if project.displayed_images.present?
       end
 
       expose :hover_image do |project, _options|
-        project.images.second if project.images.present? && project.images.count > 1
+        if project.displayed_images.present? && project.displayed_images.count > 1
+          project.displayed_images.second&.image_url
+        end
       end
 
       expose :images do |project, _options|
-        # Limit to 6 images as requested
-        project.images || []
+        # Sử dụng danh sách ảnh đã được chọn hiển thị
+        project.displayed_images.map(&:image_url)
       end
 
       expose :images_count do |project, _options|
-        project.images.count
+        project.displayed_images.count
       end
 
       expose :video_vertical, using: Api::Entities::VideoVertical

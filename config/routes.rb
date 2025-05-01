@@ -7,10 +7,16 @@ Rails.application.routes.draw do
   resources :projects do
     member do
       post :reload_images
+      get :manage_images
+      post :update_images
+      get :manage_content
+      post :update_content
     end
   end
 
   # API routes
   mount Api::Base, at: '/api'
   mount GrapeSwaggerRails::Engine => '/swagger'
+
+  root 'projects#index'
 end

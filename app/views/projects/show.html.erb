@@ -74,14 +74,21 @@
         <div class="tab-content" id="projectTabContent">
           <!-- Images Tab Content -->
           <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
-            <% if @project.respond_to?(:images) && @project.images.present? %>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Hình ảnh đã chọn hiển thị</h6>
+              <%= link_to manage_images_project_path(@project), class: 'btn btn-sm btn-outline-primary' do %>
+                <i class="fas fa-cog me-1"></i> Quản lý ảnh hiển thị
+              <% end %>
+            </div>
+            
+            <% if @project.displayed_images.present? %>
               <div class="row g-3">
-                <% @project.images.each do |image| %>
+                <% @project.displayed_images.each_with_index do |image, index| %>
                   <div class="col-md-4 col-sm-6">
                     <div class="card h-100">
-                      <img src="<%= image %>" class="card-img-top" alt="Project image">
+                      <img src="<%= image.image_url %>" class="card-img-top" alt="Project image">
                       <div class="card-footer">
-                        <a href="<%= image %>" target="_blank" class="btn btn-sm btn-outline-primary d-block">
+                        <a href="<%= image.image_url %>" target="_blank" class="btn btn-sm btn-outline-primary d-block">
                           <i class="fas fa-external-link-alt me-1"></i> Xem
                         </a>
                       </div>

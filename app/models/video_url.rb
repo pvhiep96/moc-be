@@ -1,7 +1,18 @@
 class VideoUrl < ApplicationRecord
   belongs_to :project
+  has_one :content_position, as: :positionable, dependent: :destroy
 
   validates :url, presence: true
+
+  # Phương thức để lấy vị trí hiển thị trong danh sách nội dung
+  def display_position
+    content_position&.position
+  end
+
+  # Phương thức để kiểm tra xem video có được hiển thị không
+  def displayed?
+    content_position.present?
+  end
 end
 
 # == Schema Information
