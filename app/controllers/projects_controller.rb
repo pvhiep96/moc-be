@@ -16,6 +16,7 @@ class ProjectsController < ApplicationController
   def new
     @project = Project.new
     @project.video_urls.build
+    @project.build_video_vertical
     @project.descriptions.build
   end
 
@@ -31,6 +32,7 @@ class ProjectsController < ApplicationController
 
   def edit
     @project.video_urls.build if @project.video_urls.empty?
+    @project.build_video_vertical if @project.video_vertical.nil?
     @project.descriptions.build if @project.descriptions.empty?
   end
 
@@ -64,6 +66,7 @@ class ProjectsController < ApplicationController
       :drive_id,
       :show_video,
       video_urls_attributes: %i[id url _destroy],
+      video_vertical_attributes: %i[id url _destroy],
       descriptions_attributes: %i[id content position_display _destroy]
     )
   end

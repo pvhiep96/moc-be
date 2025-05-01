@@ -1,12 +1,14 @@
 <div class="nested-fields card mb-3">
   <div class="card-body">
     <div class="form-group mb-3">
-      <%= f.label :position_display, "Vị trí" %>
-      <%= f.number_field :position_display, class: 'form-control' %>
+      <%= f.label :position_display, "Vị trí", class: "form-label fw-bold" %>
+      <%= f.number_field :position_display, class: 'form-control', min: 0 %>
+      <small class="text-muted">Số thứ tự hiển thị của mô tả</small>
     </div>
     <div class="form-group mb-3">
-      <%= f.label :content, "Nội dung" %>
-      <%= f.text_area :content, rows: 5, class: 'form-control' %>
+      <%= f.label :content, "Nội dung", class: "form-label fw-bold" %>
+      <%= f.text_area :content, class: 'form-control tinymce', rows: 5 %>
+      <small class="text-muted">Sử dụng trình soạn thảo để định dạng nội dung</small>
     </div>
     <% if f.object.persisted? %>
       <div class="form-group">

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_23_155501) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_25_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,19 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_23_155501) do
     t.string "fullname"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "content_positions", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "positionable_type", null: false
+    t.bigint "positionable_id", null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["positionable_type", "positionable_id"], name: "idx_on_positionable_type_positionable_id_8ed68c9a82", unique: true
+    t.index ["positionable_type", "positionable_id"], name: "index_content_positions_on_positionable"
+    t.index ["project_id", "position"], name: "index_content_positions_on_project_id_and_position", unique: true
+    t.index ["project_id"], name: "index_content_positions_on_project_id"
   end
 
   create_table "descriptions", force: :cascade do |t|
@@ -56,7 +69,17 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_23_155501) do
     t.index ["project_id"], name: "index_video_urls_on_project_id"
   end
 
+  create_table "video_verticals", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["project_id"], name: "index_video_verticals_on_project_id", unique: true
+  end
+
+  add_foreign_key "content_positions", "projects"
   add_foreign_key "descriptions", "projects"
   add_foreign_key "project_images", "projects"
   add_foreign_key "video_urls", "projects"
+  add_foreign_key "video_verticals", "projects"
 end

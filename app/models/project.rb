@@ -2,12 +2,14 @@ class Project < ApplicationRecord
   has_many :video_urls, dependent: :destroy
   has_many :descriptions, dependent: :destroy
   has_many :project_images, dependent: :destroy
+  has_one :video_vertical, dependent: :destroy # Changed from has_many to has_one
 
   validates :name, presence: true
   # validates :drive_id, presence: true
 
   accepts_nested_attributes_for :video_urls, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :descriptions, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :video_vertical, allow_destroy: true, reject_if: :all_blank # Changed from video_verticals to video_vertical
 
   after_save :fetch_and_save_images
 

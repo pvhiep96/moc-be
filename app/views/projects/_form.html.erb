@@ -47,137 +47,83 @@
     </div>
   </div>
 
-  <!-- Video URLs section -->
-  <div class="card mb-4 shadow-sm border-0" data-controller="nested-form">
-    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0dcaf0, #6f42c1) !important; color: white;">
-      <h5 class="mb-0"><i class="fas fa-film me-2"></i>Đường dẫn Video</h5>
-      <button type="button" data-action="click->nested-form#add" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px);">
-        <i class="fas fa-plus me-1"></i> Thêm video
-      </button>
+  <!-- Video Settings Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">Video Settings</h5>
     </div>
-    <div class="card-body bg-light">
-      <template data-nested-form-target="template">
-        <%= form.fields_for :video_urls, VideoUrl.new, child_index: 'NEW_RECORD' do |video_url| %>
-          <div class="nested-fields card mb-3 shadow-sm border-0" data-new-record="true">
-            <div class="card-body">
-              <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white"><i class="fas fa-link text-info"></i></span>
-                <%= video_url.text_field :url, class: 'form-control border-start-0 border-end-0', placeholder: "Nhập đường dẫn video (YouTube, Vimeo,...)", style: "padding-left: 0;" %>
-                <button type="button" data-action="click->nested-form#remove" class="btn btn-outline-danger border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                  <i class="fas fa-trash-alt me-1"></i> Xóa
-                </button>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </template>
-      
-      <div data-nested-form-target="container">
-        <%= form.fields_for :video_urls do |video_url| %>
-          <div class="nested-fields card mb-3 shadow-sm border-0">
-            <div class="card-body">
-              <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white"><i class="fas fa-link text-info"></i></span>
-                <%= video_url.text_field :url, class: 'form-control border-start-0 border-end-0', placeholder: "Nhập đường dẫn video (YouTube, Vimeo,...)", style: "padding-left: 0;" %>
-                <%= video_url.hidden_field :_destroy %>
-                <button type="button" data-action="click->nested-form#remove" class="btn btn-outline-danger border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
-                  <i class="fas fa-trash-alt me-1"></i> Xóa
-                </button>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-      
-      <% if project.video_urls.empty? %>
-        <div class="text-center py-4 px-3 rounded-3" style="background-color: rgba(255,255,255,0.5);">
-          <div class="d-inline-block p-3 mb-3 rounded-circle bg-white shadow-sm">
-            <i class="fas fa-film fa-2x text-info"></i>
-          </div>
-          <p class="text-muted mb-2">Chưa có đường dẫn video nào.</p>
-          <button type="button" data-action="click->nested-form#add" class="btn btn-sm btn-info">
-            <i class="fas fa-plus-circle me-1"></i> Thêm video đầu tiên
+    <div class="card-body">
+      <!-- Horizontal Videos -->
+      <h6 class="mb-3">Horizontal Videos</h6>
+      <div data-controller="nested-form">
+        <template data-nested-form-target="template">
+          <%= form.fields_for :video_urls, VideoUrl.new, child_index: 'NEW_RECORD' do |video| %>
+            <%= render 'video_url_fields', f: video %>
+          <% end %>
+        </template>
+
+        <div data-nested-form-target="container">
+          <%= form.fields_for :video_urls do |video| %>
+            <%= render 'video_url_fields', f: video %>
+          <% end %>
+        </div>
+
+        <div class="text-center mt-3 mb-4">
+          <button type="button" 
+                  data-action="nested-form#add" 
+                  class="btn btn-outline-primary">
+            <i class="fas fa-plus me-1"></i>Add Horizontal Video
           </button>
         </div>
+      </div>
+
+      <!-- Vertical Video -->
+      <h6 class="mb-3">Vertical Video</h6>
+      <div class="mb-3">
+        <div class="form-check form-switch">
+          <%= form.check_box :show_video, 
+              class: "form-check-input", 
+              data: { 
+                controller: "video-validation",
+                action: "change->video-validation#validateVideo"
+              } %>
+          <%= form.label :show_video, "Enable Video Vertical Display", class: "form-check-label" %>
+        </div>
+      </div>
+
+      <%= form.fields_for :video_vertical do |video| %>
+        <%= render 'video_vertical_fields', f: video %>
       <% end %>
     </div>
   </div>
-  
-  <!-- Descriptions section -->
-  <div class="card mb-4 shadow-sm border-0" data-controller="nested-form">
-    <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #20c997, #0dcaf0) !important; color: white;">
-      <h5 class="mb-0"><i class="fas fa-align-left me-2"></i>Nội dung mô tả</h5>
-      <button type="button" data-action="click->nested-form#add" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(5px);">
-        <i class="fas fa-plus me-1"></i> Thêm mô tả
-      </button>
+
+  <!-- Descriptions Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0">Descriptions</h5>
     </div>
-    <div class="card-body bg-light">
-      <template data-nested-form-target="template">
-        <%= form.fields_for :descriptions, Description.new, child_index: 'NEW_RECORD' do |description| %>
-          <div class="nested-fields card mb-3 shadow-sm border-0" data-new-record="true">
-            <div class="card-header bg-white py-3 border-0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                  <div class="input-group shadow-sm" style="width: 150px;">
-                    <span class="input-group-text border-end-0 bg-white"><i class="fas fa-sort-numeric-down text-success"></i></span>
-                    <%= description.number_field :position_display, class: 'form-control border-start-0', placeholder: "Vị trí", style: "padding-left: 0;" %>
-                  </div>
-                  <div class="ms-2">
-                    <span class="badge bg-info">Thứ tự hiển thị</span>
-                  </div>
-                </div>
-                <button type="button" data-action="click->nested-form#remove" class="btn btn-sm btn-outline-danger">
-                  <i class="fas fa-trash-alt me-1"></i> Xóa mục này
-                </button>
-              </div>
-            </div>
-            <div class="card-body pt-0">
-              <%= description.text_area :content, id: "description_content_new_#{Time.now.to_i}_#{rand(1000)}", rows: 5, class: 'form-control shadow-sm border tinymce', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
-            </div>
-          </div>
-        <% end %>
-      </template>
-      
-      <div data-nested-form-target="container">
-        <%= form.fields_for :descriptions do |description| %>
-          <div class="nested-fields card mb-3 shadow-sm border-0">
-            <div class="card-header bg-white py-3 border-0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                  <div class="input-group shadow-sm" style="width: 150px;">
-                    <span class="input-group-text border-end-0 bg-white"><i class="fas fa-sort-numeric-down text-success"></i></span>
-                    <%= description.number_field :position_display, class: 'form-control border-start-0', placeholder: "Vị trí", style: "padding-left: 0;" %>
-                  </div>
-                  <div class="ms-2">
-                    <span class="badge bg-info">Thứ tự hiển thị</span>
-                  </div>
-                </div>
-                <div>
-                  <%= description.hidden_field :_destroy %>
-                  <button type="button" data-action="click->nested-form#remove" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash-alt me-1"></i> Xóa mục này
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="card-body pt-0">
-              <%= description.text_area :content, id: "description_content_#{description.object.id || "existing_#{Time.now.to_i}_#{rand(1000)}"}", rows: 5, class: 'form-control shadow-sm border tinymce tinymce-active', placeholder: "Nhập nội dung mô tả chi tiết về dự án..." %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-      
-      <% if project.descriptions.empty? %>
-        <div class="text-center py-4 px-3 rounded-3" style="background-color: rgba(255,255,255,0.5);">
-          <div class="d-inline-block p-3 mb-3 rounded-circle bg-white shadow-sm">
-            <i class="fas fa-align-left fa-2x text-success"></i>
-          </div>
-          <p class="text-muted mb-2">Chưa có nội dung mô tả nào cho dự án này.</p>
-          <button type="button" data-action="click->nested-form#add" class="btn btn-sm btn-success">
-            <i class="fas fa-plus-circle me-1"></i> Thêm nội dung mô tả
+    <div class="card-body">
+      <div data-controller="nested-form">
+        <template data-nested-form-target="template">
+          <%= form.fields_for :descriptions, Description.new, child_index: 'NEW_RECORD' do |description| %>
+            <%= render 'description_fields', f: description %>
+          <% end %>
+        </template>
+
+        <div data-nested-form-target="container">
+          <%= form.fields_for :descriptions do |description| %>
+            <%= render 'description_fields', f: description %>
+          <% end %>
+        </div>
+        
+        <div class="text-center mt-3">
+          <button type="button" 
+                  data-action="nested-form#add" 
+                  class="btn btn-outline-primary">
+            <i class="fas fa-plus me-1"></i>Add Description
           </button>
         </div>
-      <% end %>
+      </div>
     </div>
   </div>
 

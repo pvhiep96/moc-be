@@ -27,4 +27,10 @@ module ApplicationHelper
     html_options[:class] = [html_options[:class], 'remove_fields'].compact.join(' ')
     f.hidden_field(:_destroy) + link_to(name, '#', html_options)
   end
+
+  def youtube_url(video_id)
+    return video_id if video_id.start_with?('http://', 'https://')
+
+    "https://www.youtube.com/watch?v=#{video_id}"
+  end
 end
