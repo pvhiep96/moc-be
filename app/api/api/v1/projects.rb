@@ -16,6 +16,15 @@ module Api
           project = Project.includes(:video_urls, :descriptions, :project_images).find(params[:id])
           present project, with: Api::Entities::Project
         end
+
+        desc 'Lấy thông tin chi tiết của một dự án với tất cả các ảnh'
+        params do
+          requires :id, type: Integer, desc: 'ID của dự án'
+        end
+        get ':id/full' do
+          project = Project.includes(:video_urls, :descriptions, :project_images).find(params[:id])
+          present project, with: Api::Entities::ProjectWithAllImages
+        end
       end
     end
   end
