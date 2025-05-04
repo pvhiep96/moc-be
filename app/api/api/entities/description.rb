@@ -7,10 +7,6 @@ module Api
       expose :position do |description, _options|
         description.display_position
       end
-
-      expose :displayed do |description, _options|
-        description.displayed?
-      end
     end
   end
 end

@@ -281,20 +281,36 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Khởi tạo Sortable.js cho container chính
-    if (typeof Sortable !== 'undefined') {
-      const sortableContainer = document.getElementById('sortable-content');
-      if (sortableContainer) {
-        new Sortable(sortableContainer, {
-          animation: 150,
-          handle: '.drag-handle',
-          ghostClass: 'sortable-ghost',
-          onEnd: function() {
-            updateOrderNumbers();
+    // Biến toàn cục để lưu trữ instance của Sortable
+    let sortableInstance;
+
+    // Hàm khởi tạo Sortable.js cho container chính
+    function initSortable() {
+      if (typeof Sortable !== 'undefined') {
+        const sortableContainer = document.getElementById('sortable-content');
+        if (sortableContainer) {
+          console.log('Initializing Sortable.js');
+
+          // Hủy instance cũ nếu có
+          if (sortableInstance) {
+            sortableInstance.destroy();
           }
-        });
+
+          // Tạo instance mới
+          sortableInstance = new Sortable(sortableContainer, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            onEnd: function() {
+              updateOrderNumbers();
+            }
+          });
+        }
       }
     }
+
+    // Khởi tạo Sortable.js lần đầu
+    initSortable();
 
     // Cập nhật số thứ tự hiển thị
     function updateOrderNumbers() {
@@ -390,6 +406,9 @@
 
           // Cập nhật số thứ tự
           updateOrderNumbers();
+
+          // Khởi tạo lại Sortable.js sau khi xóa phần tử
+          initSortable();
 
           // Thêm lại vào danh sách chưa sắp xếp
           addToUnorderedList(contentId, contentType);
@@ -506,6 +525,9 @@
       if (warningAlert) {
         warningAlert.remove();
       }
+
+      // Khởi tạo lại Sortable.js sau khi thêm phần tử mới
+      initSortable();
     }
 
     // Hàm thêm nội dung vào danh sách chưa sắp xếp

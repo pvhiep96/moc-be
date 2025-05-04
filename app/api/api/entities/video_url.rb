@@ -7,10 +7,6 @@ module Api
       expose :position do |video, _options|
         video.display_position
       end
-
-      expose :displayed do |video, _options|
-        video.displayed?
-      end
     end
   end
 end
