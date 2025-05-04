@@ -1,6 +1,8 @@
 class ProjectsController < ApplicationController
-  before_action :require_admin, except: %i[index show]
-  before_action :set_project, only: %i[show edit update destroy reload_images manage_images update_images]
+  before_action :require_admin
+  before_action :set_project,
+                only: %i[show edit update destroy reload_images manage_images update_images manage_content
+                         update_content content_item]
 
   def index
     @projects = Project.all
@@ -89,6 +91,81 @@ class ProjectsController < ApplicationController
     end
 
     redirect_to @project, notice: 'Danh sách ảnh hiển thị đã được cập nhật thành công.'
+  rescue ActiveRecord::RecordInvalid => e
+    # Xử lý lỗi validation
+    redirect_to manage_images_project_path(@project), alert: "Lỗi khi cập nhật ảnh: #{e.message}"
+  end
+
+  # Action để quản lý thứ tự hiển thị của tất cả nội dung
+  def manage_content
+    # Lấy danh sách các nội dung đã được sắp xếp
+    ordered_content_positions = @project.content_positions.includes(:positionable).order(:position)
+
+    @content_items = []
+    ordered_content_positions.each do |position|
+      @content_items << {
+        id: position.positionable_id,
+        type: position.positionable_type,
+        content: position.positionable
+      }
+    end
+
+    # Lấy danh sách các nội dung chưa được sắp xếp
+    ordered_image_ids = @project.content_positions.where(positionable_type: 'ProjectImage').pluck(:positionable_id)
+    ordered_description_ids = @project.content_positions.where(positionable_type: 'Description').pluck(:positionable_id)
+    ordered_video_ids = @project.content_positions.where(positionable_type: 'VideoUrl').pluck(:positionable_id)
+
+    @unordered_images = @project.project_images.where.not(id: ordered_image_ids)
+    @unordered_descriptions = @project.descriptions.where.not(id: ordered_description_ids)
+    @unordered_videos = @project.video_urls.where.not(id: ordered_video_ids)
+  end
+
+  # Action để cập nhật thứ tự hiển thị của tất cả nội dung
+  def update_content
+    content_order = params[:content_order] || []
+
+    ActiveRecord::Base.transaction do
+      # Xóa tất cả các content_position hiện tại
+      @project.content_positions.destroy_all
+
+      # Tạo mới các content_position dựa trên dữ liệu gửi lên
+      content_order.each_with_index do |content_item, index|
+        type, id = content_item.split('-')
+
+        @project.content_positions.create!(
+          positionable_type: type,
+          positionable_id: id,
+          position: index
+        )
+      end
+    end
+
+    redirect_to @project, notice: 'Thứ tự hiển thị nội dung đã được cập nhật thành công.'
+  rescue ActiveRecord::RecordInvalid => e
+    # Xử lý lỗi validation
+    redirect_to manage_content_project_path(@project), alert: "Lỗi khi cập nhật thứ tự hiển thị: #{e.message}"
+  end
+
+  # Action để lấy thông tin của một content item
+  def content_item
+    content_type = params[:type]
+    content_id = params[:id]
+
+    case content_type
+    when 'ProjectImage'
+      item = @project.project_images.find(content_id)
+      render json: { id: item.id, image_url: item.image_url }
+    when 'Description'
+      item = @project.descriptions.find(content_id)
+      render json: { id: item.id, content: item.content }
+    when 'VideoUrl'
+      item = @project.video_urls.find(content_id)
+      render json: { id: item.id, url: item.url }
+    else
+      render json: { error: 'Invalid content type' }, status: :bad_request
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Content item not found' }, status: :not_found
   end
 
   private

@@ -1,0 +1,762 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><%= link_to 'Trang chủ', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to @project.name, @project %></li>
+        <li class="breadcrumb-item active" aria-current="page">Quản lý thứ tự hiển thị</li>
+      </ol>
+    </nav>
+    <h2 class="mt-2 mb-0"><%= @project.name %> - Quản lý thứ tự hiển thị</h2>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white py-3">
+    <h5 class="mb-0">Sắp xếp thứ tự hiển thị</h5>
+    <p class="text-muted mb-0 small">Kéo thả để sắp xếp thứ tự hiển thị của ảnh, mô tả và video trong dự án</p>
+  </div>
+  <div class="card-body">
+    <%= form_with(url: update_content_project_path(@project), method: :post, local: true, id: "content-order-form") do |form| %>
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Thứ tự hiển thị nội dung</h6>
+          <div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="collapse-all-btn">
+              <i class="fas fa-compress-alt me-1"></i> Thu gọn tất cả
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="expand-all-btn">
+              <i class="fas fa-expand-alt me-1"></i> Mở rộng tất cả
+            </button>
+          </div>
+        </div>
+
+        <div class="alert alert-info mb-3">
+          <i class="fas fa-info-circle me-2"></i>
+          Kéo thả các mục để thay đổi thứ tự hiển thị. Thứ tự từ trên xuống dưới sẽ là thứ tự hiển thị trong dự án.
+        </div>
+
+        <div class="content-container" id="sortable-content">
+          <% if @content_items.present? %>
+            <% @content_items.each_with_index do |item, index| %>
+              <div class="content-item mb-3" data-id="<%= item[:id] %>" data-type="<%= item[:type] %>">
+                <div class="card">
+                  <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                    <div class="d-flex align-items-center">
+                      <div class="drag-handle me-2">
+                        <i class="fas fa-grip-vertical text-muted"></i>
+                      </div>
+                      <h6 class="mb-0">
+                        <% if item[:type] == 'ProjectImage' %>
+                          <i class="fas fa-image text-primary me-1"></i> Ảnh
+                        <% elsif item[:type] == 'Description' %>
+                          <i class="fas fa-align-left text-success me-1"></i> Mô tả
+                        <% elsif item[:type] == 'VideoUrl' %>
+                          <i class="fas fa-video text-danger me-1"></i> Video
+                        <% end %>
+                        <span class="badge bg-secondary ms-1"><%= index + 1 %></span>
+                      </h6>
+                    </div>
+                    <div>
+                      <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-<%= item[:id] %>-<%= item[:type] %>">
+                        <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="<%= item[:id] %>" data-type="<%= item[:type] %>">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="collapse show" id="content-<%= item[:id] %>-<%= item[:type] %>">
+                    <div class="card-body p-2">
+                      <% if item[:type] == 'ProjectImage' %>
+                        <div class="text-center">
+                          <img src="<%= item[:content].image_url %>" class="img-fluid" style="max-height: 200px;" alt="Project image">
+                        </div>
+                      <% elsif item[:type] == 'Description' %>
+                        <div class="description-content">
+                          <%= sanitize item[:content].content %>
+                        </div>
+                      <% elsif item[:type] == 'VideoUrl' %>
+                        <div class="text-center">
+                          <div class="embed-responsive">
+                            <% if item[:content].url.include?('youtube') %>
+                              <% video_id = item[:content].url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/) %>
+                              <% if video_id %>
+                                <iframe width="100%" height="200" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                              <% else %>
+                                <div class="alert alert-warning">
+                                  <i class="fas fa-exclamation-triangle me-2"></i>
+                                  Không thể hiển thị video. URL: <%= item[:content].url %>
+                                </div>
+                              <% end %>
+                            <% else %>
+                              <div class="alert alert-info">
+                                <i class="fas fa-link me-2"></i>
+                                URL Video: <%= item[:content].url %>
+                              </div>
+                            <% end %>
+                          </div>
+                        </div>
+                      <% end %>
+                      <input type="hidden" name="content_order[]" value="<%= item[:type] %>-<%= item[:id] %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Chưa có nội dung nào được chọn. Vui lòng thêm ảnh, mô tả hoặc video cho dự án.
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <h6 class="mb-3">Nội dung chưa được sắp xếp</h6>
+
+        <ul class="nav nav-tabs" id="unorderedContentTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
+              <i class="fas fa-image me-1"></i> Ảnh (<%= @unordered_images.count %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
+              <i class="fas fa-align-left me-1"></i> Mô tả (<%= @unordered_descriptions.count %>)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-controls="videos-content" aria-selected="false">
+              <i class="fas fa-video me-1"></i> Video (<%= @unordered_videos.count %>)
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="unorderedContentTabContent">
+          <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
+            <% if @unordered_images.present? %>
+              <div class="row g-3" id="unordered-images-container">
+                <% @unordered_images.each do |image| %>
+                  <div class="col-md-2 col-sm-3 col-4 unordered-item" data-id="<%= image.id %>" data-type="ProjectImage">
+                    <div class="card h-100">
+                      <img src="<%= image.image_url %>" class="card-img-top" alt="Project image">
+                      <div class="card-footer p-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= image.id %>" data-type="ProjectImage">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Không có ảnh nào chưa được sắp xếp.
+              </div>
+            <% end %>
+          </div>
+
+          <div class="tab-pane fade" id="descriptions-content" role="tabpanel" aria-labelledby="descriptions-tab">
+            <% if @unordered_descriptions.present? %>
+              <div class="row g-3" id="unordered-descriptions-container">
+                <% @unordered_descriptions.each do |description| %>
+                  <div class="col-md-4 col-sm-6 unordered-item" data-id="<%= description.id %>" data-type="Description">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="description-preview">
+                          <%= sanitize description.content.truncate(100) %>
+                        </div>
+                      </div>
+                      <div class="card-footer p-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= description.id %>" data-type="Description">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Không có mô tả nào chưa được sắp xếp.
+              </div>
+            <% end %>
+          </div>
+
+          <div class="tab-pane fade" id="videos-content" role="tabpanel" aria-labelledby="videos-tab">
+            <% if @unordered_videos.present? %>
+              <div class="row g-3" id="unordered-videos-container">
+                <% @unordered_videos.each do |video| %>
+                  <div class="col-md-4 col-sm-6 unordered-item" data-id="<%= video.id %>" data-type="VideoUrl">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <% if video.url.include?('youtube') %>
+                          <% video_id = video.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/) %>
+                          <% if video_id %>
+                            <div class="embed-responsive">
+                              <iframe width="100%" height="150" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                          <% else %>
+                            <div class="alert alert-warning">
+                              <i class="fas fa-exclamation-triangle me-2"></i>
+                              Không thể hiển thị video
+                            </div>
+                          <% end %>
+                        <% else %>
+                          <div class="alert alert-info">
+                            <i class="fas fa-link me-2"></i>
+                            URL Video: <%= video.url %>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="card-footer p-1 text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= video.id %>" data-type="VideoUrl">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Không có video nào chưa được sắp xếp.
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <%= link_to @project, class: 'btn btn-secondary' do %>
+          <i class="fas fa-arrow-left me-1"></i> Quay lại
+        <% end %>
+        <div>
+          <%= link_to manage_images_project_path(@project), class: 'btn btn-outline-info me-2' do %>
+            <i class="fas fa-images me-1"></i> Quản lý ảnh hiển thị
+          <% end %>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Lưu thứ tự hiển thị
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .content-item {
+    cursor: move;
+  }
+
+  .drag-handle {
+    cursor: grab;
+  }
+
+  .content-item.dragging {
+    opacity: 0.5;
+  }
+
+  .description-content {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .description-preview {
+    max-height: 100px;
+    overflow: hidden;
+  }
+
+  .sortable-ghost {
+    opacity: 0.4;
+    background-color: #f8f9fa;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo Sortable.js cho container chính
+    if (typeof Sortable !== 'undefined') {
+      const sortableContainer = document.getElementById('sortable-content');
+      if (sortableContainer) {
+        new Sortable(sortableContainer, {
+          animation: 150,
+          handle: '.drag-handle',
+          ghostClass: 'sortable-ghost',
+          onEnd: function() {
+            updateOrderNumbers();
+          }
+        });
+      }
+    }
+
+    // Cập nhật số thứ tự hiển thị
+    function updateOrderNumbers() {
+      document.querySelectorAll('#sortable-content .content-item').forEach((item, index) => {
+        const badge = item.querySelector('.badge');
+        if (badge) {
+          badge.textContent = index + 1;
+        }
+      });
+    }
+
+    // Xử lý nút thu gọn tất cả
+    const collapseAllBtn = document.getElementById('collapse-all-btn');
+    if (collapseAllBtn) {
+      collapseAllBtn.addEventListener('click', function() {
+        const collapseElements = document.querySelectorAll('#sortable-content .collapse');
+        collapseElements.forEach(collapse => {
+          // Sử dụng Bootstrap collapse API
+          if (window.bootstrap && bootstrap.Collapse) {
+            const bsCollapse = new bootstrap.Collapse(collapse);
+            bsCollapse.hide();
+          } else {
+            // Fallback nếu không có Bootstrap JS
+            collapse.classList.remove('show');
+          }
+        });
+
+        document.querySelectorAll('.toggle-content i').forEach(icon => {
+          icon.classList.remove('fa-chevron-up');
+          icon.classList.add('fa-chevron-down');
+        });
+      });
+    }
+
+    // Xử lý nút mở rộng tất cả
+    const expandAllBtn = document.getElementById('expand-all-btn');
+    if (expandAllBtn) {
+      expandAllBtn.addEventListener('click', function() {
+        const collapseElements = document.querySelectorAll('#sortable-content .collapse');
+        collapseElements.forEach(collapse => {
+          // Sử dụng Bootstrap collapse API
+          if (window.bootstrap && bootstrap.Collapse) {
+            const bsCollapse = new bootstrap.Collapse(collapse);
+            bsCollapse.show();
+          } else {
+            // Fallback nếu không có Bootstrap JS
+            collapse.classList.add('show');
+          }
+        });
+
+        document.querySelectorAll('.toggle-content i').forEach(icon => {
+          icon.classList.remove('fa-chevron-down');
+          icon.classList.add('fa-chevron-up');
+        });
+      });
+    }
+
+    // Xử lý nút toggle nội dung
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('toggle-content') || e.target.closest('.toggle-content')) {
+        const button = e.target.classList.contains('toggle-content') ? e.target : e.target.closest('.toggle-content');
+        const icon = button.querySelector('i');
+
+        if (icon) {
+          if (icon.classList.contains('fa-chevron-down')) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+          } else {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+          }
+        }
+      }
+    });
+
+    // Xử lý nút xóa nội dung
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('remove-content') || e.target.closest('.remove-content')) {
+        e.preventDefault(); // Ngăn chặn hành vi mặc định
+        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+
+        const button = e.target.classList.contains('remove-content') ? e.target : e.target.closest('.remove-content');
+        const contentId = button.getAttribute('data-id');
+        const contentType = button.getAttribute('data-type');
+
+        console.log('Removing content:', contentId, contentType);
+
+        // Tìm phần tử cha cần xóa
+        const contentItem = button.closest('.content-item');
+        if (contentItem) {
+          // Xóa phần tử khỏi danh sách đã sắp xếp
+          contentItem.remove();
+
+          // Cập nhật số thứ tự
+          updateOrderNumbers();
+
+          // Thêm lại vào danh sách chưa sắp xếp
+          addToUnorderedList(contentId, contentType);
+        }
+      }
+    });
+
+    // Xử lý nút thêm vào danh sách đã sắp xếp
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('add-to-order') || e.target.closest('.add-to-order')) {
+        const button = e.target.classList.contains('add-to-order') ? e.target : e.target.closest('.add-to-order');
+        const contentId = button.dataset.id;
+        const contentType = button.dataset.type;
+
+        // Tìm phần tử cha cần xóa khỏi danh sách chưa sắp xếp
+        const unorderedItem = button.closest('.unordered-item');
+        if (unorderedItem) {
+          // Lấy thông tin cần thiết trước khi xóa
+          let contentHtml = '';
+          let contentPreview = '';
+
+          if (contentType === 'ProjectImage') {
+            contentPreview = unorderedItem.querySelector('img').src;
+            contentHtml = `
+              <div class="text-center">
+                <img src="${contentPreview}" class="img-fluid" style="max-height: 200px;" alt="Project image">
+              </div>
+            `;
+          } else if (contentType === 'Description') {
+            contentPreview = unorderedItem.querySelector('.description-preview').innerHTML;
+            contentHtml = `
+              <div class="description-content">
+                ${contentPreview}
+              </div>
+            `;
+          } else if (contentType === 'VideoUrl') {
+            contentHtml = unorderedItem.querySelector('.card-body').innerHTML;
+          }
+
+          // Xóa phần tử khỏi danh sách chưa sắp xếp
+          unorderedItem.remove();
+
+          // Thêm vào danh sách đã sắp xếp
+          addToOrderedList(contentId, contentType, contentHtml);
+        }
+      }
+    });
+
+    // Hàm thêm nội dung vào danh sách đã sắp xếp
+    function addToOrderedList(contentId, contentType, contentHtml) {
+      const sortableContainer = document.getElementById('sortable-content');
+      if (!sortableContainer) return;
+
+      // Tạo phần tử mới
+      const newItem = document.createElement('div');
+      newItem.className = 'content-item mb-3';
+      newItem.dataset.id = contentId;
+      newItem.dataset.type = contentType;
+
+      // Xác định icon và tên loại nội dung
+      let iconClass = '';
+      let typeName = '';
+
+      if (contentType === 'ProjectImage') {
+        iconClass = 'fas fa-image text-primary';
+        typeName = 'Ảnh';
+      } else if (contentType === 'Description') {
+        iconClass = 'fas fa-align-left text-success';
+        typeName = 'Mô tả';
+      } else if (contentType === 'VideoUrl') {
+        iconClass = 'fas fa-video text-danger';
+        typeName = 'Video';
+      }
+
+      // Lấy số thứ tự mới
+      const newIndex = sortableContainer.querySelectorAll('.content-item').length + 1;
+
+      // Tạo HTML cho phần tử mới
+      newItem.innerHTML = `
+        <div class="card">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+            <div class="d-flex align-items-center">
+              <div class="drag-handle me-2">
+                <i class="fas fa-grip-vertical text-muted"></i>
+              </div>
+              <h6 class="mb-0">
+                <i class="${iconClass} me-1"></i> ${typeName}
+                <span class="badge bg-secondary ms-1">${newIndex}</span>
+              </h6>
+            </div>
+            <div>
+              <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-${contentId}-${contentType}">
+                <i class="fas fa-chevron-up"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="${contentId}" data-type="${contentType}">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div class="collapse show" id="content-${contentId}-${contentType}">
+            <div class="card-body p-2">
+              ${contentHtml}
+              <input type="hidden" name="content_order[]" value="${contentType}-${contentId}">
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Thêm vào container
+      sortableContainer.appendChild(newItem);
+
+      // Xóa thông báo nếu không còn
+      const warningAlert = sortableContainer.querySelector('.alert-warning');
+      if (warningAlert) {
+        warningAlert.remove();
+      }
+    }
+
+    // Hàm thêm nội dung vào danh sách chưa sắp xếp
+    function addToUnorderedList(contentId, contentType) {
+      console.log('Adding to unordered list:', contentId, contentType);
+
+      // Tìm container tương ứng
+      let container;
+      if (contentType === 'ProjectImage') {
+        container = document.getElementById('unordered-images-container');
+      } else if (contentType === 'Description') {
+        container = document.getElementById('unordered-descriptions-container');
+      } else if (contentType === 'VideoUrl') {
+        container = document.getElementById('unordered-videos-container');
+      }
+
+      if (!container) {
+        console.error('Container not found for type:', contentType);
+        return;
+      }
+
+      // Tìm nội dung trong danh sách đã sắp xếp
+      const contentItem = document.querySelector(`.content-item[data-id="${contentId}"][data-type="${contentType}"]`);
+      if (contentItem) {
+        // Tạo phần tử mới cho danh sách chưa sắp xếp
+        const newItem = document.createElement('div');
+
+        if (contentType === 'ProjectImage') {
+          const imgElement = contentItem.querySelector('img');
+          if (imgElement) {
+            newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <img src="${imgElement.src}" class="card-img-top" alt="Project image">
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        } else if (contentType === 'Description') {
+          const descriptionContent = contentItem.querySelector('.description-content');
+          if (descriptionContent) {
+            newItem.className = 'col-md-4 col-sm-6 unordered-item';
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="description-preview">
+                    ${descriptionContent.innerHTML}
+                  </div>
+                </div>
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        } else if (contentType === 'VideoUrl') {
+          const videoContent = contentItem.querySelector('.card-body');
+          if (videoContent) {
+            newItem.className = 'col-md-4 col-sm-6 unordered-item';
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <div class="card-body">
+                  ${videoContent.innerHTML}
+                </div>
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        if (newItem.innerHTML) {
+          newItem.dataset.id = contentId;
+          newItem.dataset.type = contentType;
+
+          // Thêm vào container
+          container.appendChild(newItem);
+
+          // Xóa thông báo nếu có
+          const infoAlert = container.querySelector('.alert-info');
+          if (infoAlert) {
+            infoAlert.remove();
+          }
+
+          // Chuyển tab tương ứng thành active
+          if (contentType === 'ProjectImage') {
+            const tab = document.getElementById('images-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          } else if (contentType === 'Description') {
+            const tab = document.getElementById('descriptions-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          } else if (contentType === 'VideoUrl') {
+            const tab = document.getElementById('videos-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          }
+
+          return;
+        }
+      }
+
+      // Nếu không tìm thấy trong DOM, thì mới gọi API
+      // Tạo phần tử mới cho danh sách chưa sắp xếp
+      const newItem = document.createElement('div');
+
+      // Lấy thông tin từ API
+      fetch(`/projects/<%= @project.id %>/content_item?type=${contentType}&id=${contentId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (contentType === 'ProjectImage') {
+            newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <img src="${data.image_url}" class="card-img-top" alt="Project image">
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          } else if (contentType === 'Description') {
+            newItem.className = 'col-md-4 col-sm-6 unordered-item';
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="description-preview">
+                    ${data.content}
+                  </div>
+                </div>
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          } else if (contentType === 'VideoUrl') {
+            newItem.className = 'col-md-4 col-sm-6 unordered-item';
+
+            let videoContent = '';
+            if (data.url.includes('youtube')) {
+              const videoIdMatch = data.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+              if (videoIdMatch) {
+                videoContent = `
+                  <div class="embed-responsive">
+                    <iframe width="100%" height="150" src="https://www.youtube.com/embed/${videoIdMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                  </div>
+                `;
+              } else {
+                videoContent = `
+                  <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Không thể hiển thị video
+                  </div>
+                `;
+              }
+            } else {
+              videoContent = `
+                <div class="alert alert-info">
+                  <i class="fas fa-link me-2"></i>
+                  URL Video: ${data.url}
+                </div>
+              `;
+            }
+
+            newItem.innerHTML = `
+              <div class="card h-100">
+                <div class="card-body">
+                  ${videoContent}
+                </div>
+                <div class="card-footer p-1 text-center">
+                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          newItem.dataset.id = contentId;
+          newItem.dataset.type = contentType;
+
+          // Thêm vào container
+          container.appendChild(newItem);
+
+          // Xóa thông báo nếu có
+          const infoAlert = container.querySelector('.alert-info');
+          if (infoAlert) {
+            infoAlert.remove();
+          }
+
+          // Chuyển tab tương ứng thành active
+          if (contentType === 'ProjectImage') {
+            const tab = document.getElementById('images-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          } else if (contentType === 'Description') {
+            const tab = document.getElementById('descriptions-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          } else if (contentType === 'VideoUrl') {
+            const tab = document.getElementById('videos-tab');
+            if (tab && typeof bootstrap !== 'undefined') {
+              const tabInstance = new bootstrap.Tab(tab);
+              tabInstance.show();
+            } else if (tab) {
+              tab.click();
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching content item:', error);
+          // Không hiển thị alert ở đây nữa
+        });
+    }
+  });
+</script>

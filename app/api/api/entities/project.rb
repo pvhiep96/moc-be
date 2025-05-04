@@ -4,9 +4,8 @@ module Api
       expose :id
       expose :name
       expose :drive_id
-      expose :video_urls, using: Api::Entities::VideoUrl
-      expose :descriptions, using: Api::Entities::Description
       expose :show_video
+      expose :video_vertical, using: Api::Entities::VideoVertical
 
       expose :cover_image do |project, _options|
         project.displayed_images.first&.image_url if project.displayed_images.present?
@@ -18,8 +17,48 @@ module Api
         end
       end
 
+      # Thêm danh sách nội dung đã được sắp xếp theo thứ tự hiển thị
+      expose :ordered_content do |project, _options|
+        ordered_items = project.content_positions.includes(:positionable).order(:position)
+
+        ordered_items.map do |position|
+          item = position.positionable
+          positionable_type = position.positionable_type
+
+          case positionable_type
+          when 'ProjectImage'
+            {
+              id: item.id,
+              type: 'images',
+              position: position.position,
+              image_url: item.image_url
+            }
+          when 'Description'
+            {
+              id: item.id,
+              type: 'description',
+              position: position.position,
+              content: item.content
+            }
+          when 'VideoUrl'
+            {
+              id: item.id,
+              type: 'video',
+              position: position.position,
+              url: item.url
+            }
+          else
+            {
+              id: item.id,
+              type: 'unknown',
+              position: position.position
+            }
+          end
+        end
+      end
+
+      # Giữ lại các trường cũ để tương thích ngược
       expose :images do |project, _options|
-        # Sử dụng danh sách ảnh đã được chọn hiển thị
         project.displayed_images.map(&:image_url)
       end
 
@@ -27,7 +66,8 @@ module Api
         project.displayed_images.count
       end
 
-      expose :video_vertical, using: Api::Entities::VideoVertical
+      expose :video_urls, using: Api::Entities::VideoUrl
+      expose :descriptions, using: Api::Entities::Description
     end
   end
 end

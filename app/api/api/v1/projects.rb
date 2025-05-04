@@ -4,7 +4,7 @@ module Api
       resource :projects do
         desc 'Lấy danh sách tất cả các dự án'
         get do
-          projects = Project.includes(:video_urls)
+          projects = Project.includes(:video_urls, :video_vertical)
           present projects, with: Api::Entities::Project
         end
 
@@ -13,7 +13,14 @@ module Api
           requires :id, type: Integer, desc: 'ID của dự án'
         end
         get ':id' do
-          project = Project.includes(:video_urls, :descriptions, :project_images).find(params[:id])
+          project = Project.includes(
+            :video_urls,
+            :descriptions,
+            :project_images,
+            :video_vertical,
+            content_positions: :positionable
+          ).find(params[:id])
+
           present project, with: Api::Entities::Project
         end
 
@@ -22,7 +29,14 @@ module Api
           requires :id, type: Integer, desc: 'ID của dự án'
         end
         get ':id/full' do
-          project = Project.includes(:video_urls, :descriptions, :project_images).find(params[:id])
+          project = Project.includes(
+            :video_urls,
+            :descriptions,
+            :project_images,
+            :video_vertical,
+            content_positions: :positionable
+          ).find(params[:id])
+
           present project, with: Api::Entities::ProjectWithAllImages
         end
       end

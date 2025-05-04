@@ -13,17 +13,18 @@ end
 #
 # Table name: content_positions
 #
-#  id               :bigint           not null, primary key
-#  project_id       :bigint           not null
+#  id                :bigint           not null, primary key
+#  project_id        :bigint           not null
 #  positionable_type :string           not null
 #  positionable_id   :bigint           not null
-#  position         :integer          not null
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
+#  position          :integer          not null
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
 #
 # Indexes
 #
-#  index_content_positions_on_positionable  (positionable_type,positionable_id) UNIQUE
-#  index_content_positions_on_project_id    (project_id)
-#  index_content_positions_on_project_id_and_position  (project_id,position) UNIQUE
+#  idx_on_positionable_type_positionable_id_8ed68c9a82  (positionable_type,positionable_id) UNIQUE
+#  index_content_positions_on_positionable              (positionable_type,positionable_id)
+#  index_content_positions_on_project_id                (project_id)
+#  index_content_positions_on_project_id_and_position   (project_id,position) UNIQUE
 #

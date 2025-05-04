@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       post :update_images
       get :manage_content
       post :update_content
+      get :content_item
     end
   end
 
