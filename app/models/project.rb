@@ -5,8 +5,9 @@ class Project < ApplicationRecord
   has_one :video_vertical, dependent: :destroy
   has_many :content_positions, dependent: :destroy
 
-  validates :name, presence: true
-  # validates :drive_id, presence: true
+  validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :drive_id,
+            format: { with: /\A[a-zA-Z0-9_-]+\z/, message: 'only allows letters, numbers, underscores and hyphens' }, allow_blank: true
 
   accepts_nested_attributes_for :video_urls, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :descriptions, allow_destroy: true, reject_if: :all_blank

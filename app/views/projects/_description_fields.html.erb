@@ -1,20 +1,28 @@
 <div class="nested-fields card mb-3">
   <div class="card-body">
-    
     <div class="form-group mb-3">
-      <%= f.label :content, "Nội dung", class: "form-label fw-bold" %>
+      <%= f.label :content, "Nội dung", class: "form-label fw-semibold" %>
       <%= f.text_area :content, class: 'form-control tinymce', rows: 5 %>
-      <small class="text-muted">Sử dụng trình soạn thảo để định dạng nội dung</small>
+      <div class="form-text">Sử dụng trình soạn thảo để định dạng nội dung</div>
+
+      <% if f.object.errors[:content].any? %>
+        <div class="alert alert-danger mt-2">
+          <% f.object.errors[:content].each do |error| %>
+            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
+
     <% if f.object.persisted? %>
-      <div class="form-group">
+      <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
         <%= f.label :_destroy, "Xóa mô tả này" %>
       </div>
     <% else %>
-      <div class="form-group">
+      <div class="form-group mt-2">
         <%= link_to_remove_association "Xóa", f, class: 'btn btn-danger btn-sm' %>
       </div>
     <% end %>
   </div>
-</div> 
+</div>

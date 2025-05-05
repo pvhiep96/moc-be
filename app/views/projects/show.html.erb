@@ -59,7 +59,7 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="vertical-video-tab" data-bs-toggle="tab" data-bs-target="#vertical-video-content" type="button" role="tab" aria-controls="vertical-video-content" aria-selected="false">
               <i class="fas fa-mobile-alt me-2"></i>Vertical Video
-              <% if @project.video_vertical&.url.present? %>
+              <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
                 <span class="badge rounded-pill bg-success ms-1">1</span>
               <% end %>
             </button>
@@ -77,11 +77,8 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h6 class="mb-0">Hình ảnh đã chọn hiển thị</h6>
               <div>
-                <%= link_to manage_content_project_path(@project), class: 'btn btn-sm btn-outline-info me-2' do %>
+                <%= link_to manage_content_project_path(@project), class: 'btn btn-sm btn-outline-info' do %>
                   <i class="fas fa-sort me-1"></i> Quản lý thứ tự hiển thị
-                <% end %>
-                <%= link_to manage_images_project_path(@project), class: 'btn btn-sm btn-outline-primary' do %>
-                  <i class="fas fa-cog me-1"></i> Quản lý ảnh hiển thị
                 <% end %>
               </div>
             </div>
@@ -137,7 +134,38 @@
 
           <!-- Vertical Video Tab Content -->
           <div class="tab-pane fade" id="vertical-video-content" role="tabpanel" aria-labelledby="vertical-video-tab">
-            <% if @project.video_vertical&.url.present? %>
+            <% if @project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record? %>
+              <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-file-video me-2"></i>File Video Đã Tải Lên</h6>
+                    <span class="badge bg-light text-dark">
+                      <%= number_to_human_size(@project.video_vertical.video_file.byte_size) %>
+                    </span>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <small class="text-muted">Tên file: <strong><%= @project.video_vertical.video_file.filename %></strong></small>
+                      <small class="text-muted">Định dạng: <%= @project.video_vertical.video_file.content_type %></small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">Đã tải lên: <%= time_ago_in_words(@project.video_vertical.video_file.created_at) %> trước</small>
+                      <a href="<%= url_for(@project.video_vertical.video_file) %>" download class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-download me-1"></i> Tải xuống
+                      </a>
+                    </div>
+                  </div>
+                  <div class="ratio ratio-9x16">
+                    <video controls class="w-100">
+                      <source src="<%= url_for(@project.video_vertical.video_file) %>" type="<%= @project.video_vertical.video_file.content_type %>">
+                      Trình duyệt của bạn không hỗ trợ thẻ video.
+                    </video>
+                  </div>
+                </div>
+              </div>
+            <% elsif @project.video_vertical&.url.present? %>
               <div class="list-group">
                 <div class="list-group-item">
                   <div class="d-flex justify-content-between align-items-center">
@@ -206,7 +234,7 @@
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span><i class="fas fa-mobile-alt me-2"></i>Vertical Video:</span>
-            <% if @project.video_vertical&.url.present? %>
+            <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
               <span class="badge bg-success rounded-pill">Active</span>
             <% else %>
               <span class="badge bg-secondary rounded-pill">Inactive</span>

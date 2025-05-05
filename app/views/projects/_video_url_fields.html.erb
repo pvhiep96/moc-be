@@ -1,13 +1,30 @@
 <div class="nested-fields card mb-3">
   <div class="card-body">
-    <div class="form-group">
-      <%= f.label :url %>
-      <%= f.text_field :url, class: 'form-control' %>
+    <div class="form-group mb-3">
+      <%= f.label :url, "URL Video YouTube", class: "form-label fw-semibold" %>
+      <%= f.text_field :url,
+          class: "form-control",
+          placeholder: "Nhập URL video YouTube (ví dụ: https://www.youtube.com/watch?v=VIDEO_ID)",
+          data: {
+            controller: "video-url",
+            action: "input->video-url#validateUrl"
+          } %>
+      <div class="mt-3" data-video-url-target="preview"></div>
+      <div class="form-text">Nhập một URL YouTube hợp lệ (ví dụ: https://www.youtube.com/watch?v=VIDEO_ID)</div>
+
+      <% if f.object.errors[:url].any? %>
+        <div class="alert alert-danger mt-2">
+          <% f.object.errors[:url].each do |error| %>
+            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
+
     <% if f.object.persisted? %>
-      <div class="form-group">
+      <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Xóa URL này" %>
+        <%= f.label :_destroy, "Xóa URL video này" %>
       </div>
     <% else %>
       <div class="form-group mt-2">
@@ -15,4 +32,4 @@
       </div>
     <% end %>
   </div>
-</div> 
+</div>

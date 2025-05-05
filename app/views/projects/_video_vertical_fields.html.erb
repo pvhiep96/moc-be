@@ -1,24 +1,70 @@
-<div class="nested-fields card mb-3">
+<div class="nested-fields mb-3">
   <div class="card-body">
-    <div class="form-group">
-      <%= f.label :url, "Vertical Video URL", class: "form-label fw-semibold" %>
-      <%= f.text_field :url, 
-          class: "form-control",
-          placeholder: "Enter vertical video URL (YouTube)",
-          data: { 
-            controller: "video-url",
-            action: "input->video-url#validateUrl"
-          } %>
-      <div class="mt-3" data-video-url-target="preview"></div>
+    <% if f.object.errors[:base].any? %>
+      <div class="alert alert-danger mb-3">
+        <% f.object.errors[:base].each do |error| %>
+          <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="form-group mb-3">
+      <% if f.object.errors[:url].any? %>
+        <div class="alert alert-danger mt-2">
+          <% f.object.errors[:url].each do |error| %>
+            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
+
+    <div class="form-group mb-3" data-controller="video-file">
+      <%= f.label :video_file, "Tải lên File Video", class: "form-label fw-semibold" %>
+      <%= f.file_field :video_file,
+          class: "form-control",
+          accept: "video/mp4,video/quicktime,video/x-msvideo,video/x-flv,video/webm",
+          data: {
+            video_file_target: "input",
+            action: "change->video-file#previewVideo"
+          } %>
+      <div class="form-text">
+        Định dạng hỗ trợ: MP4, MOV, AVI, FLV, WEBM. Kích thước tối đa: 500MB.
+      </div>
+
+      <% if f.object.errors[:video_file].any? %>
+        <div class="alert alert-danger mt-2">
+          <% f.object.errors[:video_file].each do |error| %>
+            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div data-video-file-target="preview">
+        <% if f.object.video_file&.attached? && !f.object.video_file.blob.new_record? %>
+          <div class="mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <p class="mb-0">File video hiện tại: <strong><%= f.object.video_file.filename %></strong></p>
+              <span class="badge bg-info"><%= number_to_human_size(f.object.video_file.byte_size) %></span>
+            </div>
+            <div class="ratio ratio-9x16">
+              <video controls class="w-100">
+                <source src="<%= url_for(f.object.video_file) %>" type="<%= f.object.video_file.content_type %>">
+                Trình duyệt của bạn không hỗ trợ thẻ video.
+              </video>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <% if f.object.persisted? %>
       <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Delete this video" %>
+        <%= f.label :_destroy, "Xóa video này" %>
       </div>
     <% else %>
       <div class="form-group mt-2">
-        <%= link_to_remove_association "Remove", f, class: 'btn btn-danger btn-sm' %>
+        <%= link_to_remove_association "Xóa", f, class: 'btn btn-danger btn-sm' %>
       </div>
     <% end %>
   </div>

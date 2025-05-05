@@ -1,7 +1,7 @@
 class ProjectsController < ApplicationController
   before_action :require_admin
   before_action :set_project,
-                only: %i[show edit update destroy reload_images manage_images update_images manage_content
+                only: %i[show edit update destroy reload_images manage_content
                          update_content content_item]
 
   def index
@@ -28,7 +28,18 @@ class ProjectsController < ApplicationController
     if @project.save
       redirect_to @project, notice: 'Project was successfully created.'
     else
-      render :new
+      # Ensure nested models are built for the form
+      @project.video_urls.build if @project.video_urls.empty?
+      @project.build_video_vertical if @project.video_vertical.nil?
+      @project.descriptions.build if @project.descriptions.empty?
+
+      # Log errors for debugging
+      Rails.logger.debug("Project validation errors: #{@project.errors.full_messages}")
+      if @project.video_vertical&.errors.present?
+        Rails.logger.debug("Video vertical errors: #{@project.video_vertical.errors.full_messages}")
+      end
+
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -42,7 +53,18 @@ class ProjectsController < ApplicationController
     if @project.update(project_params)
       redirect_to @project, notice: 'Project was successfully updated.'
     else
-      render :edit
+      # Ensure nested models are built for the form
+      @project.video_urls.build if @project.video_urls.empty?
+      @project.build_video_vertical if @project.video_vertical.nil?
+      @project.descriptions.build if @project.descriptions.empty?
+
+      # Log errors for debugging
+      Rails.logger.debug("Project validation errors: #{@project.errors.full_messages}")
+      if @project.video_vertical&.errors.present?
+        Rails.logger.debug("Video vertical errors: #{@project.video_vertical.errors.full_messages}")
+      end
+
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -54,46 +76,6 @@ class ProjectsController < ApplicationController
   def reload_images
     @project.reload_images
     redirect_to @project, notice: 'Images have been successfully reloaded from Google Drive.'
-  end
-
-  # Action để quản lý ảnh hiển thị
-  def manage_images
-    @project_images = @project.project_images
-
-    # Lấy danh sách ID ảnh đã được chọn hiển thị
-    @selected_image_ids = @project.content_positions
-                                  .where(positionable_type: 'ProjectImage')
-                                  .order(:position)
-                                  .pluck(:positionable_id)
-
-    # Đánh dấu các ảnh đã được chọn
-    @project_images.each do |image|
-      image.display = @selected_image_ids.include?(image.id)
-    end
-  end
-
-  # Action để cập nhật ảnh hiển thị
-  def update_images
-    selected_image_ids = params[:selected_images] || []
-
-    ActiveRecord::Base.transaction do
-      # Xóa tất cả các content_position hiện tại của project cho ảnh
-      @project.content_positions.where(positionable_type: 'ProjectImage').destroy_all
-
-      # Tạo mới các content_position dựa trên dữ liệu gửi lên
-      selected_image_ids.each_with_index do |image_id, index|
-        @project.content_positions.create!(
-          positionable_type: 'ProjectImage',
-          positionable_id: image_id,
-          position: index
-        )
-      end
-    end
-
-    redirect_to @project, notice: 'Danh sách ảnh hiển thị đã được cập nhật thành công.'
-  rescue ActiveRecord::RecordInvalid => e
-    # Xử lý lỗi validation
-    redirect_to manage_images_project_path(@project), alert: "Lỗi khi cập nhật ảnh: #{e.message}"
   end
 
   # Action để quản lý thứ tự hiển thị của tất cả nội dung
@@ -182,7 +164,7 @@ class ProjectsController < ApplicationController
       :drive_id,
       :show_video,
       video_urls_attributes: %i[id url _destroy],
-      video_vertical_attributes: %i[id url _destroy],
+      video_vertical_attributes: %i[id url video_file _destroy],
       descriptions_attributes: %i[id content position_display _destroy]
     )
   end
