@@ -27,15 +27,15 @@ function handleAddFields(event) {
     const time = new Date().getTime();
     const regexp = new RegExp(event.target.dataset.id, 'g');
     const template = event.target.dataset.fields.replace(regexp, time);
-    
+
     // Lấy node dựa trên data-association-insertion-node attribute
     const targetNodeSelector = event.target.getAttribute('data-association-insertion-node');
     const targetNode = document.querySelector(targetNodeSelector);
-    
+
     if (targetNode) {
       // Lấy phương thức chèn từ data-association-insertion-method attribute
       const insertionMethod = event.target.getAttribute('data-association-insertion-method');
-      
+
       if (insertionMethod === 'append') {
         targetNode.insertAdjacentHTML('beforeend', template);
       } else {
@@ -71,7 +71,7 @@ function setupEventHandlers() {
 // Khởi tạo các sự kiện
 function initializeEvents() {
   setupEventHandlers();
-  
+
   // Enable Bootstrap tooltips
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   if (tooltipTriggerList.length > 0) {
@@ -94,13 +94,13 @@ document.addEventListener("DOMContentLoaded", initializeEvents);
 document.addEventListener("turbo:load", function() {
   if (typeof tinyMCE !== 'undefined') {
     tinyMCE.remove();
-    
+
     const textareas = document.querySelectorAll('textarea.tinymce:not(.tinymce-active)')
     textareas.forEach(textarea => {
       const uniqueId = `tinymce_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`
       textarea.id = uniqueId
       textarea.classList.add('tinymce-active')
-      
+
       tinyMCE.init({
         selector: `#${uniqueId}`,
         plugins: [
@@ -112,7 +112,7 @@ document.addEventListener("turbo:load", function() {
         ],
         toolbar1: 'undo redo | styles fontfamily fontsize | bold italic underline strikethrough subscript superscript | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent',
         toolbar2: 'image media link | table | charmap emoticons codesample | pagebreak nonbreaking | searchreplace code fullscreen | visualblocks visualchars | help',
-        
+
         // Cấu hình menu (hiển thị đầy đủ menu)
         menubar: 'file edit view insert format tools table help',
         menu: {
@@ -124,11 +124,11 @@ document.addEventListener("turbo:load", function() {
           tools: { title: 'Tools', items: 'spellchecker spellcheckerlanguage | code wordcount' },
           table: { title: 'Table', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
         },
-        
+
         // Cấu hình font và kích thước
-        font_family_formats: 'Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats',
+        font_family_formats: 'Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats; DFVN TAN - MON CHERI="DFVN TAN - MON CHERI",sans-serif',
         font_size_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 28pt 36pt 48pt 72pt',
-        
+
         // Cấu hình styles
         style_formats: [
           { title: 'Headers', items: [
@@ -153,9 +153,15 @@ document.addEventListener("turbo:load", function() {
             { title: 'Blockquote', format: 'blockquote' },
             { title: 'Div', format: 'div' },
             { title: 'Pre', format: 'pre' }
+          ]},
+          { title: 'Fonts', items: [
+            { title: 'Arial', inline: 'span', styles: { 'font-family': 'Arial' } },
+            { title: 'Times New Roman', inline: 'span', styles: { 'font-family': 'Times New Roman' } },
+            { title: 'Courier New', inline: 'span', styles: { 'font-family': 'Courier New' } },
+            { title: 'DFVN TAN - MON CHERI', inline: 'span', styles: { 'font-family': '"DFVN TAN - MON CHERI"' } }
           ]}
         ],
-        
+
         // Cấu hình hình ảnh
         image_advtab: true,
         image_caption: true,
@@ -163,7 +169,7 @@ document.addEventListener("turbo:load", function() {
         paste_data_images: true,
         automatic_uploads: true,
         file_picker_types: 'image',
-        
+
         // Cấu hình bảng
         table_default_attributes: {
           border: '1'
@@ -173,7 +179,7 @@ document.addEventListener("turbo:load", function() {
           'width': '100%'
         },
         table_responsive_width: true,
-        
+
         // Cấu hình khác
         height: 500,
         min_height: 300,
@@ -184,9 +190,16 @@ document.addEventListener("turbo:load", function() {
         promotion: false,
         browser_spellcheck: true,
         contextmenu: 'link image table',
-        
+
         // Style mặc định
         content_style: `
+          @font-face {
+            font-family: 'DFVN TAN - MON CHERI';
+            src: url('/DFVN TAN - MON CHERI.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+          }
           body {
             font-family: Arial, sans-serif;
             font-size: 14pt;
@@ -216,6 +229,9 @@ document.addEventListener("turbo:load", function() {
             background: #f4f4f4;
             padding: 15px;
             border-radius: 4px;
+          }
+          .mon-cheri-font {
+            font-family: 'DFVN TAN - MON CHERI', sans-serif;
           }
         `
       });

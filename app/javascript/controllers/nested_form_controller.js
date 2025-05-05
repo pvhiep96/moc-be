@@ -2,25 +2,25 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["template", "container"]
-  
+
   connect() {
     console.log("Nested form controller connected")
   }
-  
+
   add(event) {
     event.preventDefault()
     const timestamp = new Date().getTime()
     const content = this.templateTarget.innerHTML.replace(/NEW_RECORD/g, timestamp)
     this.containerTarget.insertAdjacentHTML("beforeend", content)
-    
+
     const newTextareas = this.containerTarget.querySelectorAll('textarea.tinymce:not(.tinymce-active)')
-    
+
     if (newTextareas.length > 0) {
       newTextareas.forEach(textarea => {
         const uniqueId = `tinymce_${timestamp}_${Math.random().toString(36).substr(2, 9)}`
         textarea.id = uniqueId
         textarea.classList.add('tinymce-active')
-        
+
         if (typeof tinyMCE !== 'undefined') {
           tinyMCE.init({
             selector: `#${uniqueId}`,
@@ -33,7 +33,7 @@ export default class extends Controller {
             ],
             toolbar1: 'undo redo | styles fontfamily fontsize | bold italic underline strikethrough subscript superscript | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | outdent indent',
             toolbar2: 'image media link | table | charmap emoticons codesample | pagebreak nonbreaking | searchreplace code fullscreen | visualblocks visualchars | help',
-            
+
             menubar: 'file edit view insert format tools table help',
             menu: {
               file: { title: 'File', items: 'newdocument restoredraft | preview | print' },
@@ -45,7 +45,7 @@ export default class extends Controller {
               table: { title: 'Table', items: 'inserttable | cell row column | advtablesort | tableprops deletetable' }
             },
 
-            font_family_formats: 'Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats',
+            font_family_formats: 'Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats; DFVN TAN - MON CHERI="DFVN TAN - MON CHERI",sans-serif',
             font_size_formats: '8pt 9pt 10pt 11pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 26pt 28pt 36pt 48pt 72pt',
 
             style_formats: [
@@ -71,6 +71,12 @@ export default class extends Controller {
                 { title: 'Blockquote', format: 'blockquote' },
                 { title: 'Div', format: 'div' },
                 { title: 'Pre', format: 'pre' }
+              ]},
+              { title: 'Fonts', items: [
+                { title: 'Arial', inline: 'span', styles: { 'font-family': 'Arial' } },
+                { title: 'Times New Roman', inline: 'span', styles: { 'font-family': 'Times New Roman' } },
+                { title: 'Courier New', inline: 'span', styles: { 'font-family': 'Courier New' } },
+                { title: 'DFVN TAN - MON CHERI', inline: 'span', styles: { 'font-family': '"DFVN TAN - MON CHERI"' } }
               ]}
             ],
 
@@ -101,6 +107,13 @@ export default class extends Controller {
             contextmenu: 'link image table',
 
             content_style: `
+              @font-face {
+                font-family: 'DFVN TAN - MON CHERI';
+                src: url('/DFVN TAN - MON CHERI.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+              }
               body {
                 font-family: Arial, sans-serif;
                 font-size: 14pt;
@@ -131,18 +144,21 @@ export default class extends Controller {
                 padding: 15px;
                 border-radius: 4px;
               }
+              .mon-cheri-font {
+                font-family: 'DFVN TAN - MON CHERI', sans-serif;
+              }
             `
           })
         }
       })
     }
   }
-  
+
   remove(event) {
     event.preventDefault()
     const item = event.target.closest(".nested-fields")
     const hiddenField = item.querySelector('input[name*="_destroy"]')
-    
+
     if (hiddenField) {
       hiddenField.value = "1"
       item.style.display = 'none'
