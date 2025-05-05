@@ -18,7 +18,17 @@ class VideoVertical < ApplicationRecord
   def video_url
     if video_file.attached? && !video_file.blob.new_record?
       begin
-        Rails.application.routes.url_helpers.rails_blob_url(video_file, only_path: true)
+        host = if Rails.env.production?
+                 'http://47.129.243.193:3006'
+               else
+                 nil # Will use relative URL in development
+               end
+
+        if host
+          Rails.application.routes.url_helpers.rails_blob_url(video_file, host: host)
+        else
+          Rails.application.routes.url_helpers.rails_blob_url(video_file, only_path: true)
+        end
       rescue StandardError => e
         Rails.logger.error("Error generating video URL: #{e.message}")
         nil

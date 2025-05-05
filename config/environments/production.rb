@@ -42,6 +42,10 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
+  # Set the host for URL generation
+  config.active_storage.resolve_model_to_route = :rails_storage_redirect
+  Rails.application.routes.default_url_options[:host] = 'http://47.129.243.193:3006'
+
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"

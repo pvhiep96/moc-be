@@ -6,10 +6,16 @@ module Api
       expose :video_url do |video_vertical, _options|
         if video_vertical.video_file.attached? && !video_vertical.video_file.blob.new_record?
           begin
+            host = if Rails.env.production?
+                     'http://47.129.243.193:3006'
+                   else
+                     ActionController::Base.asset_host ||
+                       "#{_options[:env]['rack.url_scheme']}://#{_options[:env]['HTTP_HOST']}"
+                   end
+
             Rails.application.routes.url_helpers.rails_blob_url(
               video_vertical.video_file,
-              host: ActionController::Base.asset_host ||
-                    "#{_options[:env]['rack.url_scheme']}://#{_options[:env]['HTTP_HOST']}"
+              host: host
             )
           rescue StandardError => e
             Rails.logger.error("Error generating video URL in API: #{e.message}")
