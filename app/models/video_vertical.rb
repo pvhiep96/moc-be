@@ -4,7 +4,6 @@ class VideoVertical < ApplicationRecord
 
   validates :project_id, uniqueness: true
   validate :url_or_video_file_present
-  validate :valid_video_url, if: -> { url.present? }
 
   # Validate video file type
   validate :acceptable_video, if: -> { video_file.attached? }
@@ -14,23 +13,6 @@ class VideoVertical < ApplicationRecord
 
     errors.add(:base, 'URL hoặc file video phải được cung cấp')
     errors.add(:url, 'Vui lòng nhập URL YouTube hoặc tải lên file video')
-  end
-
-  def valid_video_url
-    return if url.blank?
-
-    # Check for YouTube URL format
-    youtube_regex = %r{^(https?://)?(www\.)?
-      (youtube\.com/watch\?v=|
-       youtu\.be/|
-       youtube\.com/embed/|
-       youtube\.com/v/|
-       youtube\.com/watch\?.*&v=)
-      ([^&=%?]{11})}x
-
-    return if url =~ youtube_regex
-
-    errors.add(:url, 'phải là URL YouTube hợp lệ')
   end
 
   def video_url
