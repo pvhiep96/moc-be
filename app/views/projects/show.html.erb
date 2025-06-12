@@ -58,7 +58,7 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="vertical-video-tab" data-bs-toggle="tab" data-bs-target="#vertical-video-content" type="button" role="tab" aria-controls="vertical-video-content" aria-selected="false">
-              <i class="fas fa-mobile-alt me-2"></i>Vertical Video
+              <i class="fas fa-mobile-alt me-2"></i>Thumbnail Video
               <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
                 <span class="badge rounded-pill bg-success ms-1">1</span>
               <% end %>
@@ -132,7 +132,7 @@
             <% end %>
           </div>
 
-          <!-- Vertical Video Tab Content -->
+          <!-- Thumbnail Video Tab Content -->
           <div class="tab-pane fade" id="vertical-video-content" role="tabpanel" aria-labelledby="vertical-video-tab">
             <% if @project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record? %>
               <div class="card mb-3">
@@ -183,7 +183,7 @@
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Chưa có Vertical Video nào được thêm vào.
+                <i class="fas fa-info-circle me-2"></i> Chưa có Thumbnail Video nào được thêm vào.
               </div>
             <% end %>
           </div>
@@ -233,7 +233,7 @@
             <span class="badge bg-info rounded-pill"><%= @project.video_urls.count %></span>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-mobile-alt me-2"></i>Vertical Video:</span>
+            <span><i class="fas fa-mobile-alt me-2"></i>Thumbnail Video:</span>
             <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
               <span class="badge bg-success rounded-pill">Active</span>
             <% else %>
