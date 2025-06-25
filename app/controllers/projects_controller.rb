@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   before_action :require_admin
   before_action :set_project,
                 only: %i[show edit update destroy reload_images manage_content
-                         update_content content_item]
+                         update_content content_item update_content_positions]
 
   def index
     @projects = Project.all
@@ -126,6 +126,41 @@ class ProjectsController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     # Xử lý lỗi validation
     redirect_to manage_content_project_path(@project), alert: "Lỗi khi cập nhật thứ tự hiển thị: #{e.message}"
+  end
+
+  # Action để cập nhật content_position khi kéo thả (AJAX)
+  def update_content_positions
+    positions = params[:positions] || []
+
+    ActiveRecord::Base.transaction do
+      # Xóa tất cả content_positions hiện tại để tránh conflict
+      @project.content_positions.destroy_all
+
+      # Tạo lại content_positions với thứ tự mới
+      positions.each do |position_data|
+        @project.content_positions.create!(
+          positionable_type: position_data[:type],
+          positionable_id: position_data[:id],
+          position: position_data[:position]
+        )
+      end
+    end
+
+    render json: {
+      success: true,
+      message: 'Thứ tự đã được cập nhật thành công',
+      positions: positions
+    }
+  rescue ActiveRecord::RecordInvalid => e
+    render json: {
+      success: false,
+      error: "Lỗi khi cập nhật thứ tự: #{e.message}"
+    }, status: :unprocessable_entity
+  rescue StandardError => e
+    render json: {
+      success: false,
+      error: "Lỗi không xác định: #{e.message}"
+    }, status: :internal_server_error
   end
 
   # Action để lấy thông tin của một content item

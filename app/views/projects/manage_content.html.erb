@@ -276,505 +276,581 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Biến toàn cục để lưu trữ instance của Sortable
-    let sortableInstance;
-
-    // Hàm khởi tạo Sortable.js cho container chính
-    function initSortable() {
-      if (typeof Sortable !== 'undefined') {
-        const sortableContainer = document.getElementById('sortable-content');
-        if (sortableContainer) {
-          console.log('Initializing Sortable.js');
-
-          // Hủy instance cũ nếu có
-          if (sortableInstance) {
-            sortableInstance.destroy();
-          }
-
-          // Tạo instance mới
-          sortableInstance = new Sortable(sortableContainer, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'sortable-ghost',
-            onEnd: function() {
-              updateOrderNumbers();
-            }
-          });
+  function initSortable() {
+    if (typeof Sortable !== 'undefined') {
+      const sortableContainer = document.getElementById('sortable-content');
+      if (sortableContainer) {
+        console.log('Initializing Sortable.js');
+        if (window.sortableInstance) {
+          window.sortableInstance.destroy();
         }
+        window.sortableInstance = new Sortable(sortableContainer, {
+          animation: 150,
+          handle: '.drag-handle',
+          ghostClass: 'sortable-ghost',
+          onStart: function(evt) {
+            console.log('Drag started', evt);
+          },
+          onEnd: function(evt) {
+            console.log('Drag ended', evt);
+            updateOrderNumbers();
+            updateContentPositions();
+          }
+        });
       }
     }
+  }
 
-    // Khởi tạo Sortable.js lần đầu
-    initSortable();
+  function updateOrderNumbers() {
+    document.querySelectorAll('#sortable-content .content-item').forEach((item, index) => {
+      const badge = item.querySelector('.badge');
+      if (badge) {
+        badge.textContent = index + 1;
+      }
+    });
+  }
 
-    // Cập nhật số thứ tự hiển thị
-    function updateOrderNumbers() {
-      document.querySelectorAll('#sortable-content .content-item').forEach((item, index) => {
-        const badge = item.querySelector('.badge');
-        if (badge) {
-          badge.textContent = index + 1;
+  // Hàm cập nhật content_position khi kéo thả
+  function updateContentPositions() {
+    const contentItems = document.querySelectorAll('#sortable-content .content-item');
+    const positions = [];
+    
+    contentItems.forEach((item, index) => {
+      const contentId = item.dataset.id;
+      const contentType = item.dataset.type;
+      positions.push({
+        id: contentId,
+        type: contentType,
+        position: index + 1
+      });
+    });
+
+    console.log('Updating content positions:', positions);
+
+    // Lấy CSRF token từ meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Gửi AJAX request để cập nhật thứ tự
+    fetch(`/projects/<%= @project.id %>/update_content_positions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ positions: positions })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Content positions updated successfully:', data);
+      // Hiển thị thông báo thành công
+      showNotification('Thứ tự đã được cập nhật thành công!', 'success');
+    })
+    .catch(error => {
+      console.error('Error updating content positions:', error);
+      // Hiển thị thông báo lỗi
+      showNotification('Có lỗi xảy ra khi cập nhật thứ tự!', 'error');
+    });
+  }
+
+  // Hàm hiển thị thông báo
+  function showNotification(message, type) {
+    // Tạo thông báo Bootstrap
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+      <i class="fas ${iconClass} me-2"></i>${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Tự động ẩn sau 3 giây
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 3000);
+  }
+
+  // Khởi tạo Sortable khi DOMContentLoaded hoặc Turbo load
+  function readySortable() {
+    setTimeout(initSortable, 100);
+  }
+  document.addEventListener('DOMContentLoaded', readySortable);
+  document.addEventListener('turbo:load', readySortable);
+  document.addEventListener('turbo:render', readySortable);
+
+  // Xử lý nút thu gọn tất cả
+  const collapseAllBtn = document.getElementById('collapse-all-btn');
+  if (collapseAllBtn) {
+    collapseAllBtn.addEventListener('click', function() {
+      const collapseElements = document.querySelectorAll('#sortable-content .collapse');
+      collapseElements.forEach(collapse => {
+        // Sử dụng Bootstrap collapse API
+        if (window.bootstrap && bootstrap.Collapse) {
+          const bsCollapse = new bootstrap.Collapse(collapse);
+          bsCollapse.hide();
+        } else {
+          // Fallback nếu không có Bootstrap JS
+          collapse.classList.remove('show');
         }
       });
-    }
 
-    // Xử lý nút thu gọn tất cả
-    const collapseAllBtn = document.getElementById('collapse-all-btn');
-    if (collapseAllBtn) {
-      collapseAllBtn.addEventListener('click', function() {
-        const collapseElements = document.querySelectorAll('#sortable-content .collapse');
-        collapseElements.forEach(collapse => {
-          // Sử dụng Bootstrap collapse API
-          if (window.bootstrap && bootstrap.Collapse) {
-            const bsCollapse = new bootstrap.Collapse(collapse);
-            bsCollapse.hide();
-          } else {
-            // Fallback nếu không có Bootstrap JS
-            collapse.classList.remove('show');
-          }
-        });
-
-        document.querySelectorAll('.toggle-content i').forEach(icon => {
-          icon.classList.remove('fa-chevron-up');
-          icon.classList.add('fa-chevron-down');
-        });
+      document.querySelectorAll('.toggle-content i').forEach(icon => {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
       });
-    }
+    });
+  }
 
-    // Xử lý nút mở rộng tất cả
-    const expandAllBtn = document.getElementById('expand-all-btn');
-    if (expandAllBtn) {
-      expandAllBtn.addEventListener('click', function() {
-        const collapseElements = document.querySelectorAll('#sortable-content .collapse');
-        collapseElements.forEach(collapse => {
-          // Sử dụng Bootstrap collapse API
-          if (window.bootstrap && bootstrap.Collapse) {
-            const bsCollapse = new bootstrap.Collapse(collapse);
-            bsCollapse.show();
-          } else {
-            // Fallback nếu không có Bootstrap JS
-            collapse.classList.add('show');
-          }
-        });
+  // Xử lý nút mở rộng tất cả
+  const expandAllBtn = document.getElementById('expand-all-btn');
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', function() {
+      const collapseElements = document.querySelectorAll('#sortable-content .collapse');
+      collapseElements.forEach(collapse => {
+        // Sử dụng Bootstrap collapse API
+        if (window.bootstrap && bootstrap.Collapse) {
+          const bsCollapse = new bootstrap.Collapse(collapse);
+          bsCollapse.show();
+        } else {
+          // Fallback nếu không có Bootstrap JS
+          collapse.classList.add('show');
+        }
+      });
 
-        document.querySelectorAll('.toggle-content i').forEach(icon => {
+      document.querySelectorAll('.toggle-content i').forEach(icon => {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      });
+    });
+  }
+
+  // Xử lý nút toggle nội dung
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('toggle-content') || e.target.closest('.toggle-content')) {
+      const button = e.target.classList.contains('toggle-content') ? e.target : e.target.closest('.toggle-content');
+      const icon = button.querySelector('i');
+
+      if (icon) {
+        if (icon.classList.contains('fa-chevron-down')) {
           icon.classList.remove('fa-chevron-down');
           icon.classList.add('fa-chevron-up');
-        });
-      });
+        } else {
+          icon.classList.remove('fa-chevron-up');
+          icon.classList.add('fa-chevron-down');
+        }
+      }
     }
+  });
 
-    // Xử lý nút toggle nội dung
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('toggle-content') || e.target.closest('.toggle-content')) {
-        const button = e.target.classList.contains('toggle-content') ? e.target : e.target.closest('.toggle-content');
-        const icon = button.querySelector('i');
+  // Xử lý nút xóa nội dung
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-content') || e.target.closest('.remove-content')) {
+      e.preventDefault(); // Ngăn chặn hành vi mặc định
+      e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
 
-        if (icon) {
-          if (icon.classList.contains('fa-chevron-down')) {
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-up');
-          } else {
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-          }
-        }
-      }
-    });
+      const button = e.target.classList.contains('remove-content') ? e.target : e.target.closest('.remove-content');
+      const contentId = button.getAttribute('data-id');
+      const contentType = button.getAttribute('data-type');
 
-    // Xử lý nút xóa nội dung
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('remove-content') || e.target.closest('.remove-content')) {
-        e.preventDefault(); // Ngăn chặn hành vi mặc định
-        e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+      console.log('Removing content:', contentId, contentType);
 
-        const button = e.target.classList.contains('remove-content') ? e.target : e.target.closest('.remove-content');
-        const contentId = button.getAttribute('data-id');
-        const contentType = button.getAttribute('data-type');
-
-        console.log('Removing content:', contentId, contentType);
-
-        // Tìm phần tử cha cần xóa
-        const contentItem = button.closest('.content-item');
-        if (contentItem) {
-          // Xóa phần tử khỏi danh sách đã sắp xếp
-          contentItem.remove();
-
-          // Cập nhật số thứ tự
-          updateOrderNumbers();
-
-          // Khởi tạo lại Sortable.js sau khi xóa phần tử
-          initSortable();
-
-          // Thêm lại vào danh sách chưa sắp xếp
-          addToUnorderedList(contentId, contentType);
-        }
-      }
-    });
-
-    // Xử lý nút thêm vào danh sách đã sắp xếp
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('add-to-order') || e.target.closest('.add-to-order')) {
-        const button = e.target.classList.contains('add-to-order') ? e.target : e.target.closest('.add-to-order');
-        const contentId = button.dataset.id;
-        const contentType = button.dataset.type;
-
-        // Tìm phần tử cha cần xóa khỏi danh sách chưa sắp xếp
-        const unorderedItem = button.closest('.unordered-item');
-        if (unorderedItem) {
-          // Lấy thông tin cần thiết trước khi xóa
-          let contentHtml = '';
-          let contentPreview = '';
-
-          if (contentType === 'ProjectImage') {
-            contentPreview = unorderedItem.querySelector('img').src;
-            contentHtml = `
-              <div class="text-center">
-                <img src="${contentPreview}" class="img-fluid" style="max-height: 200px;" alt="Project image">
-              </div>
-            `;
-          } else if (contentType === 'Description') {
-            contentPreview = unorderedItem.querySelector('.description-preview').innerHTML;
-            contentHtml = `
-              <div class="description-content">
-                ${contentPreview}
-              </div>
-            `;
-          } else if (contentType === 'VideoUrl') {
-            contentHtml = unorderedItem.querySelector('.card-body').innerHTML;
-          }
-
-          // Xóa phần tử khỏi danh sách chưa sắp xếp
-          unorderedItem.remove();
-
-          // Thêm vào danh sách đã sắp xếp
-          addToOrderedList(contentId, contentType, contentHtml);
-        }
-      }
-    });
-
-    // Hàm thêm nội dung vào danh sách đã sắp xếp
-    function addToOrderedList(contentId, contentType, contentHtml) {
-      const sortableContainer = document.getElementById('sortable-content');
-      if (!sortableContainer) return;
-
-      // Tạo phần tử mới
-      const newItem = document.createElement('div');
-      newItem.className = 'content-item mb-3';
-      newItem.dataset.id = contentId;
-      newItem.dataset.type = contentType;
-
-      // Xác định icon và tên loại nội dung
-      let iconClass = '';
-      let typeName = '';
-
-      if (contentType === 'ProjectImage') {
-        iconClass = 'fas fa-image text-primary';
-        typeName = 'Ảnh';
-      } else if (contentType === 'Description') {
-        iconClass = 'fas fa-align-left text-success';
-        typeName = 'Mô tả';
-      } else if (contentType === 'VideoUrl') {
-        iconClass = 'fas fa-video text-danger';
-        typeName = 'Video';
-      }
-
-      // Lấy số thứ tự mới
-      const newIndex = sortableContainer.querySelectorAll('.content-item').length + 1;
-
-      // Tạo HTML cho phần tử mới
-      newItem.innerHTML = `
-        <div class="card">
-          <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-            <div class="d-flex align-items-center">
-              <div class="drag-handle me-2">
-                <i class="fas fa-grip-vertical text-muted"></i>
-              </div>
-              <h6 class="mb-0">
-                <i class="${iconClass} me-1"></i> ${typeName}
-                <span class="badge bg-secondary ms-1">${newIndex}</span>
-              </h6>
-            </div>
-            <div>
-              <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-${contentId}-${contentType}">
-                <i class="fas fa-chevron-up"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="${contentId}" data-type="${contentType}">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </div>
-          <div class="collapse show" id="content-${contentId}-${contentType}">
-            <div class="card-body p-2">
-              ${contentHtml}
-              <input type="hidden" name="content_order[]" value="${contentType}-${contentId}">
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Thêm vào container
-      sortableContainer.appendChild(newItem);
-
-      // Xóa thông báo nếu không còn
-      const warningAlert = sortableContainer.querySelector('.alert-warning');
-      if (warningAlert) {
-        warningAlert.remove();
-      }
-
-      // Khởi tạo lại Sortable.js sau khi thêm phần tử mới
-      initSortable();
-    }
-
-    // Hàm thêm nội dung vào danh sách chưa sắp xếp
-    function addToUnorderedList(contentId, contentType) {
-      console.log('Adding to unordered list:', contentId, contentType);
-
-      // Tìm container tương ứng
-      let container;
-      if (contentType === 'ProjectImage') {
-        container = document.getElementById('unordered-images-container');
-      } else if (contentType === 'Description') {
-        container = document.getElementById('unordered-descriptions-container');
-      } else if (contentType === 'VideoUrl') {
-        container = document.getElementById('unordered-videos-container');
-      }
-
-      if (!container) {
-        console.error('Container not found for type:', contentType);
-        return;
-      }
-
-      // Tìm nội dung trong danh sách đã sắp xếp
-      const contentItem = document.querySelector(`.content-item[data-id="${contentId}"][data-type="${contentType}"]`);
+      // Tìm phần tử cha cần xóa
+      const contentItem = button.closest('.content-item');
       if (contentItem) {
-        // Tạo phần tử mới cho danh sách chưa sắp xếp
-        const newItem = document.createElement('div');
+        // Xóa phần tử khỏi danh sách đã sắp xếp
+        contentItem.remove();
+
+        // Cập nhật số thứ tự
+        updateOrderNumbers();
+
+        // Khởi tạo lại Sortable.js sau khi xóa phần tử
+        initSortable();
+
+        // Cập nhật content_position sau khi xóa
+        updateContentPositions();
+
+        // Thêm lại vào danh sách chưa sắp xếp
+        addToUnorderedList(contentId, contentType);
+      }
+    }
+  });
+
+  // Xử lý nút thêm vào danh sách đã sắp xếp
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('add-to-order') || e.target.closest('.add-to-order')) {
+      const button = e.target.classList.contains('add-to-order') ? e.target : e.target.closest('.add-to-order');
+      const contentId = button.dataset.id;
+      const contentType = button.dataset.type;
+
+      // Tìm phần tử cha cần xóa khỏi danh sách chưa sắp xếp
+      const unorderedItem = button.closest('.unordered-item');
+      if (unorderedItem) {
+        // Lấy thông tin cần thiết trước khi xóa
+        let contentHtml = '';
+        let contentPreview = '';
 
         if (contentType === 'ProjectImage') {
-          const imgElement = contentItem.querySelector('img');
-          if (imgElement) {
-            newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <img src="${imgElement.src}" class="card-img-top" alt="Project image">
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-            `;
-          }
+          contentPreview = unorderedItem.querySelector('img').src;
+          contentHtml = `
+            <div class="text-center">
+              <img src="${contentPreview}" class="img-fluid" style="max-height: 200px;" alt="Project image">
+            </div>
+          `;
         } else if (contentType === 'Description') {
-          const descriptionContent = contentItem.querySelector('.description-content');
-          if (descriptionContent) {
-            newItem.className = 'col-md-4 col-sm-6 unordered-item';
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="description-preview">
-                    ${descriptionContent.innerHTML}
-                  </div>
-                </div>
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-            `;
-          }
+          contentPreview = unorderedItem.querySelector('.description-preview').innerHTML;
+          contentHtml = `
+            <div class="description-content">
+              ${contentPreview}
+            </div>
+          `;
         } else if (contentType === 'VideoUrl') {
-          const videoContent = contentItem.querySelector('.card-body');
-          if (videoContent) {
-            newItem.className = 'col-md-4 col-sm-6 unordered-item';
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <div class="card-body">
-                  ${videoContent.innerHTML}
-                </div>
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-            `;
-          }
+          contentHtml = unorderedItem.querySelector('.card-body').innerHTML;
         }
 
-        if (newItem.innerHTML) {
-          newItem.dataset.id = contentId;
-          newItem.dataset.type = contentType;
+        // Xóa phần tử khỏi danh sách chưa sắp xếp
+        unorderedItem.remove();
 
-          // Thêm vào container
-          container.appendChild(newItem);
+        // Thêm vào danh sách đã sắp xếp
+        addToOrderedList(contentId, contentType, contentHtml);
 
-          // Xóa thông báo nếu có
-          const infoAlert = container.querySelector('.alert-info');
-          if (infoAlert) {
-            infoAlert.remove();
-          }
-
-          // Chuyển tab tương ứng thành active
-          if (contentType === 'ProjectImage') {
-            const tab = document.getElementById('images-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
-          } else if (contentType === 'Description') {
-            const tab = document.getElementById('descriptions-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
-          } else if (contentType === 'VideoUrl') {
-            const tab = document.getElementById('videos-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
-          }
-
-          return;
-        }
+        // Cập nhật content_position sau khi thêm
+        updateContentPositions();
       }
+    }
+  });
 
-      // Nếu không tìm thấy trong DOM, thì mới gọi API
+  // Hàm thêm nội dung vào danh sách đã sắp xếp
+  function addToOrderedList(contentId, contentType, contentHtml) {
+    const sortableContainer = document.getElementById('sortable-content');
+    if (!sortableContainer) return;
+
+    // Tạo phần tử mới
+    const newItem = document.createElement('div');
+    newItem.className = 'content-item mb-3';
+    newItem.dataset.id = contentId;
+    newItem.dataset.type = contentType;
+
+    // Xác định icon và tên loại nội dung
+    let iconClass = '';
+    let typeName = '';
+
+    if (contentType === 'ProjectImage') {
+      iconClass = 'fas fa-image text-primary';
+      typeName = 'Ảnh';
+    } else if (contentType === 'Description') {
+      iconClass = 'fas fa-align-left text-success';
+      typeName = 'Mô tả';
+    } else if (contentType === 'VideoUrl') {
+      iconClass = 'fas fa-video text-danger';
+      typeName = 'Video';
+    }
+
+    // Lấy số thứ tự mới
+    const newIndex = sortableContainer.querySelectorAll('.content-item').length + 1;
+
+    // Tạo HTML cho phần tử mới
+    newItem.innerHTML = `
+      <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+          <div class="d-flex align-items-center">
+            <div class="drag-handle me-2">
+              <i class="fas fa-grip-vertical text-muted"></i>
+            </div>
+            <h6 class="mb-0">
+              <i class="${iconClass} me-1"></i> ${typeName}
+              <span class="badge bg-secondary ms-1">${newIndex}</span>
+            </h6>
+          </div>
+          <div>
+            <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-${contentId}-${contentType}">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="${contentId}" data-type="${contentType}">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="collapse show" id="content-${contentId}-${contentType}">
+          <div class="card-body p-2">
+            ${contentHtml}
+            <input type="hidden" name="content_order[]" value="${contentType}-${contentId}">
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Thêm vào container
+    sortableContainer.appendChild(newItem);
+
+    // Xóa thông báo nếu không còn
+    const warningAlert = sortableContainer.querySelector('.alert-warning');
+    if (warningAlert) {
+      warningAlert.remove();
+    }
+
+    // Khởi tạo lại Sortable.js sau khi thêm phần tử mới
+    initSortable();
+  }
+
+  // Hàm thêm nội dung vào danh sách chưa sắp xếp
+  function addToUnorderedList(contentId, contentType) {
+    console.log('Adding to unordered list:', contentId, contentType);
+
+    // Tìm container tương ứng
+    let container;
+    if (contentType === 'ProjectImage') {
+      container = document.getElementById('unordered-images-container');
+    } else if (contentType === 'Description') {
+      container = document.getElementById('unordered-descriptions-container');
+    } else if (contentType === 'VideoUrl') {
+      container = document.getElementById('unordered-videos-container');
+    }
+
+    if (!container) {
+      console.error('Container not found for type:', contentType);
+      return;
+    }
+
+    // Tìm nội dung trong danh sách đã sắp xếp
+    const contentItem = document.querySelector(`.content-item[data-id="${contentId}"][data-type="${contentType}"]`);
+    if (contentItem) {
       // Tạo phần tử mới cho danh sách chưa sắp xếp
       const newItem = document.createElement('div');
 
-      // Lấy thông tin từ API
-      fetch(`/projects/<%= @project.id %>/content_item?type=${contentType}&id=${contentId}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (contentType === 'ProjectImage') {
-            newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <img src="${data.image_url}" class="card-img-top" alt="Project image">
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
+      if (contentType === 'ProjectImage') {
+        const imgElement = contentItem.querySelector('img');
+        if (imgElement) {
+          newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <img src="${imgElement.src}" class="card-img-top" alt="Project image">
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      } else if (contentType === 'Description') {
+        const descriptionContent = contentItem.querySelector('.description-content');
+        if (descriptionContent) {
+          newItem.className = 'col-md-4 col-sm-6 unordered-item';
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="description-preview">
+                  ${descriptionContent.innerHTML}
                 </div>
               </div>
-            `;
-          } else if (contentType === 'Description') {
-            newItem.className = 'col-md-4 col-sm-6 unordered-item';
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="description-preview">
-                    ${data.content}
-                  </div>
-                </div>
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
               </div>
-            `;
-          } else if (contentType === 'VideoUrl') {
-            newItem.className = 'col-md-4 col-sm-6 unordered-item';
+            </div>
+          `;
+        }
+      } else if (contentType === 'VideoUrl') {
+        const videoContent = contentItem.querySelector('.card-body');
+        if (videoContent) {
+          newItem.className = 'col-md-4 col-sm-6 unordered-item';
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                ${videoContent.innerHTML}
+              </div>
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      }
 
-            let videoContent = '';
-            if (data.url.includes('youtube')) {
-              const videoIdMatch = data.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-              if (videoIdMatch) {
-                videoContent = `
-                  <div class="embed-responsive">
-                    <iframe width="100%" height="150" src="https://www.youtube.com/embed/${videoIdMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                  </div>
-                `;
-              } else {
-                videoContent = `
-                  <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Không thể hiển thị video
-                  </div>
-                `;
-              }
+      if (newItem.innerHTML) {
+        newItem.dataset.id = contentId;
+        newItem.dataset.type = contentType;
+
+        // Thêm vào container
+        container.appendChild(newItem);
+
+        // Xóa thông báo nếu có
+        const infoAlert = container.querySelector('.alert-info');
+        if (infoAlert) {
+          infoAlert.remove();
+        }
+
+        // Chuyển tab tương ứng thành active
+        if (contentType === 'ProjectImage') {
+          const tab = document.getElementById('images-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
+          }
+        } else if (contentType === 'Description') {
+          const tab = document.getElementById('descriptions-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
+          }
+        } else if (contentType === 'VideoUrl') {
+          const tab = document.getElementById('videos-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
+          }
+        }
+
+        return;
+      }
+    }
+
+    // Nếu không tìm thấy trong DOM, thì mới gọi API
+    // Tạo phần tử mới cho danh sách chưa sắp xếp
+    const newItem = document.createElement('div');
+
+    // Lấy thông tin từ API
+    fetch(`/projects/<%= @project.id %>/content_item?type=${contentType}&id=${contentId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (contentType === 'ProjectImage') {
+          newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <img src="${data.image_url}" class="card-img-top" alt="Project image">
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        } else if (contentType === 'Description') {
+          newItem.className = 'col-md-4 col-sm-6 unordered-item';
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="description-preview">
+                  ${data.content}
+                </div>
+              </div>
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        } else if (contentType === 'VideoUrl') {
+          newItem.className = 'col-md-4 col-sm-6 unordered-item';
+
+          let videoContent = '';
+          if (data.url.includes('youtube')) {
+            const videoIdMatch = data.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if (videoIdMatch) {
+              videoContent = `
+                <div class="embed-responsive">
+                  <iframe width="100%" height="150" src="https://www.youtube.com/embed/${videoIdMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+              `;
             } else {
               videoContent = `
-                <div class="alert alert-info">
-                  <i class="fas fa-link me-2"></i>
-                  URL Video: ${data.url}
+                <div class="alert alert-warning">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  Không thể hiển thị video
                 </div>
               `;
             }
-
-            newItem.innerHTML = `
-              <div class="card h-100">
-                <div class="card-body">
-                  ${videoContent}
-                </div>
-                <div class="card-footer p-1 text-center">
-                  <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
+          } else {
+            videoContent = `
+              <div class="alert alert-info">
+                <i class="fas fa-link me-2"></i>
+                URL Video: ${data.url}
               </div>
             `;
           }
 
-          newItem.dataset.id = contentId;
-          newItem.dataset.type = contentType;
+          newItem.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                ${videoContent}
+              </div>
+              <div class="card-footer p-1 text-center">
+                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }
 
-          // Thêm vào container
-          container.appendChild(newItem);
+        newItem.dataset.id = contentId;
+        newItem.dataset.type = contentType;
 
-          // Xóa thông báo nếu có
-          const infoAlert = container.querySelector('.alert-info');
-          if (infoAlert) {
-            infoAlert.remove();
+        // Thêm vào container
+        container.appendChild(newItem);
+
+        // Xóa thông báo nếu có
+        const infoAlert = container.querySelector('.alert-info');
+        if (infoAlert) {
+          infoAlert.remove();
+        }
+
+        // Chuyển tab tương ứng thành active
+        if (contentType === 'ProjectImage') {
+          const tab = document.getElementById('images-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
           }
-
-          // Chuyển tab tương ứng thành active
-          if (contentType === 'ProjectImage') {
-            const tab = document.getElementById('images-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
-          } else if (contentType === 'Description') {
-            const tab = document.getElementById('descriptions-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
-          } else if (contentType === 'VideoUrl') {
-            const tab = document.getElementById('videos-tab');
-            if (tab && typeof bootstrap !== 'undefined') {
-              const tabInstance = new bootstrap.Tab(tab);
-              tabInstance.show();
-            } else if (tab) {
-              tab.click();
-            }
+        } else if (contentType === 'Description') {
+          const tab = document.getElementById('descriptions-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
           }
-        })
-        .catch(error => {
-          console.error('Error fetching content item:', error);
-          // Không hiển thị alert ở đây nữa
-        });
-    }
-  });
+        } else if (contentType === 'VideoUrl') {
+          const tab = document.getElementById('videos-tab');
+          if (tab && typeof bootstrap !== 'undefined') {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+          } else if (tab) {
+            tab.click();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching content item:', error);
+        // Không hiển thị alert ở đây nữa
+      });
+  }
 </script>

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       get :manage_content
       post :update_content
       get :content_item
+      post :update_content_positions
     end
   end
 
