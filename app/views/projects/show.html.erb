@@ -1,32 +1,31 @@
-
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><%= link_to 'Trang chủ', projects_path %></li>
-        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
-        <li class="breadcrumb-item active" aria-current="page">Chi tiết</li>
+        <li class="breadcrumb-item"><%= link_to 'Home', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Projects', projects_path %></li>
+        <li class="breadcrumb-item active" aria-current="page">Details</li>
       </ol>
     </nav>
     <h2 class="mt-2 mb-0"><%= @project.name %></h2>
   </div>
   <div class="d-flex gap-2">
     <%= link_to edit_project_path(@project), class: 'btn btn-warning' do %>
-      <i class="fas fa-edit me-1"></i> Chỉnh sửa
+      <i class="fas fa-edit me-1"></i> Edit
     <% end %>
     <% if @project.respond_to?(:reload_images) %>
       <%= button_to reload_images_project_path(@project), method: :post, class: 'btn btn-info' do %>
-        <i class="fas fa-sync-alt me-1"></i> Tải lại hình ảnh
+        <i class="fas fa-sync-alt me-1"></i> Reload Images
       <% end %>
     <% end %>
     <%= button_to project_path(@project),
         method: :delete,
         class: 'btn btn-danger',
-        form: { data: { turbo_confirm: 'Bạn có chắc chắn muốn xóa?' } } do %>
-      <i class="fas fa-trash me-1"></i> Xóa
+        form: { data: { turbo_confirm: 'Are you sure you want to delete?' } } do %>
+      <i class="fas fa-trash me-1"></i> Delete
     <% end %>
     <%= link_to projects_path, class: 'btn btn-secondary' do %>
-      <i class="fas fa-arrow-left me-1"></i> Quay lại
+      <i class="fas fa-arrow-left me-1"></i> Back
     <% end %>
   </div>
 </div>
@@ -48,7 +47,7 @@
         <ul class="nav nav-tabs mb-4" id="projectTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
-              <i class="fas fa-images me-2"></i>Hình ảnh <span class="badge rounded-pill bg-warning ms-1"><%= @project.images.count rescue 0 %></span>
+              <i class="fas fa-images me-2"></i>Images <span class="badge rounded-pill bg-warning ms-1"><%= @project.images.count rescue 0 %></span>
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -66,7 +65,7 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
-              <i class="fas fa-align-left me-2"></i>Mô tả
+              <i class="fas fa-align-left me-2"></i>Descriptions
             </button>
           </li>
         </ul>
@@ -75,10 +74,10 @@
           <!-- Images Tab Content -->
           <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="mb-0">Hình ảnh đã chọn hiển thị</h6>
+              <h6 class="mb-0">Selected images to display</h6>
               <div>
                 <%= link_to manage_content_project_path(@project), class: 'btn btn-sm btn-outline-info' do %>
-                  <i class="fas fa-sort me-1"></i> Quản lý thứ tự hiển thị
+                  <i class="fas fa-sort me-1"></i> Manage display order
                 <% end %>
               </div>
             </div>
@@ -91,7 +90,7 @@
                       <img src="<%= image.image_url %>" class="card-img-top" alt="Project image">
                       <div class="card-footer">
                         <a href="<%= image.image_url %>" target="_blank" class="btn btn-sm btn-outline-primary d-block">
-                          <i class="fas fa-external-link-alt me-1"></i> Xem
+                          <i class="fas fa-external-link-alt me-1"></i> View
                         </a>
                       </div>
                     </div>
@@ -100,7 +99,7 @@
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Chưa có hình ảnh nào được thêm vào.
+                <i class="fas fa-info-circle me-2"></i> No images have been added yet.
               </div>
             <% end %>
           </div>
@@ -119,7 +118,7 @@
                         </div>
                       </div>
                       <a href="<%= youtube_url(video_url.url) %>" target="_blank" class="btn btn-sm btn-outline-primary ms-3">
-                        <i class="fas fa-external-link-alt"></i> Mở
+                        <i class="fas fa-external-link-alt"></i> Open
                       </a>
                     </div>
                   </div>
@@ -127,7 +126,7 @@
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Chưa có Video URL nào được thêm vào.
+                <i class="fas fa-info-circle me-2"></i> No Video URLs have been added yet.
               </div>
             <% end %>
           </div>
@@ -138,7 +137,7 @@
               <div class="card mb-3">
                 <div class="card-header bg-success text-white">
                   <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0"><i class="fas fa-file-video me-2"></i>File Video Đã Tải Lên</h6>
+                    <h6 class="mb-0"><i class="fas fa-file-video me-2"></i>Uploaded Video File</h6>
                     <span class="badge bg-light text-dark">
                       <%= number_to_human_size(@project.video_vertical.video_file.byte_size) %>
                     </span>
@@ -147,20 +146,20 @@
                 <div class="card-body">
                   <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                      <small class="text-muted">Tên file: <strong><%= @project.video_vertical.video_file.filename %></strong></small>
-                      <small class="text-muted">Định dạng: <%= @project.video_vertical.video_file.content_type %></small>
+                      <small class="text-muted">File name: <strong><%= @project.video_vertical.video_file.filename %></strong></small>
+                      <small class="text-muted">Format: <%= @project.video_vertical.video_file.content_type %></small>
                     </div>
                     <div class="d-flex justify-content-between">
-                      <small class="text-muted">Đã tải lên: <%= time_ago_in_words(@project.video_vertical.video_file.created_at) %> trước</small>
+                      <small class="text-muted">Uploaded: <%= time_ago_in_words(@project.video_vertical.video_file.created_at) %> ago</small>
                       <a href="<%= url_for(@project.video_vertical.video_file) %>" download class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-download me-1"></i> Tải xuống
+                        <i class="fas fa-download me-1"></i> Download
                       </a>
                     </div>
                   </div>
                   <div class="ratio ratio-9x16">
                     <video controls class="w-100">
                       <source src="<%= url_for(@project.video_vertical.video_file) %>" type="<%= @project.video_vertical.video_file.content_type %>">
-                      Trình duyệt của bạn không hỗ trợ thẻ video.
+                      Your browser does not support the video tag.
                     </video>
                   </div>
                 </div>
@@ -176,14 +175,14 @@
                       </div>
                     </div>
                     <a href="<%= youtube_url(@project.video_vertical.url) %>" target="_blank" class="btn btn-sm btn-outline-primary ms-3">
-                      <i class="fas fa-external-link-alt"></i> Mở
+                      <i class="fas fa-external-link-alt"></i> Open
                     </a>
                   </div>
                 </div>
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Chưa có Thumbnail Video nào được thêm vào.
+                <i class="fas fa-info-circle me-2"></i> No Thumbnail Video has been added yet.
               </div>
             <% end %>
           </div>
@@ -197,7 +196,7 @@
                     <div class="card-header bg-light">
                       <div class="d-flex align-items-center">
                         <span class="badge bg-primary me-2"><%= description.position_display %></span>
-                        <h6 class="mb-0">Nội dung mô tả</h6>
+                        <h6 class="mb-0">Description content</h6>
                       </div>
                     </div>
                     <div class="card-body">
@@ -208,7 +207,7 @@
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> Chưa có mô tả nào được thêm vào.
+                <i class="fas fa-info-circle me-2"></i> No descriptions have been added yet.
               </div>
             <% end %>
           </div>
@@ -220,7 +219,7 @@
   <div class="col-lg-4">
     <div class="card mb-4 shadow-sm border-0">
       <div class="card-header bg-info text-white">
-        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin dự án</h5>
+        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Project Information</h5>
       </div>
       <div class="card-body">
         <ul class="list-group list-group-flush">
@@ -241,12 +240,12 @@
             <% end %>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-file-alt me-2"></i>Mô tả:</span>
+            <span><i class="fas fa-file-alt me-2"></i>Descriptions:</span>
             <span class="badge bg-success rounded-pill"><%= @project.descriptions.count %></span>
           </li>
           <% if @project.respond_to?(:images) %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><i class="fas fa-images me-2"></i>Hình ảnh:</span>
+              <span><i class="fas fa-images me-2"></i>Images:</span>
               <span class="badge bg-warning rounded-pill"><%= @project.images.count rescue 0 %></span>
             </li>
           <% end %>

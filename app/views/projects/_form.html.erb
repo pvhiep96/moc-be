@@ -1,7 +1,7 @@
 <%= form_with(model: project, local: true) do |form| %>
   <% if project.errors.any? %>
     <div class="alert alert-danger shadow-sm border-0">
-      <h4><i class="fas fa-exclamation-triangle me-2"></i><%= pluralize(project.errors.count, "lỗi") %> đã ngăn cản lưu dự án này:</h4>
+      <h4><i class="fas fa-exclamation-triangle me-2"></i><%= pluralize(project.errors.count, "error") %> prevented this project from being saved:</h4>
       <ul>
         <% project.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -12,27 +12,27 @@
 
   <div class="card mb-4 shadow-sm border-0">
     <div class="card-header bg-primary text-white" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;">
-      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin dự án</h5>
+      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Project Information</h5>
     </div>
     <div class="card-body">
       <div class="row g-4">
         <div class="col-md-6">
           <div class="form-group mb-3">
-            <%= form.label :name, "Tên dự án", class: "form-label fw-bold" %>
+            <%= form.label :name, "Project Name", class: "form-label fw-bold" %>
             <div class="input-group shadow-sm">
-              <%= form.text_field :name, class: 'form-control', placeholder: "Nhập tên dự án" %>
+              <%= form.text_field :name, class: 'form-control', placeholder: "Enter project name" %>
             </div>
-            <small class="text-muted">Tên dự án sẽ hiển thị trên trang chủ</small>
+            <small class="text-muted">Project name will be displayed on the homepage</small>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group mb-3">
-            <%= form.label :drive_id, "ID Google Drive", class: "form-label fw-bold" %>
+            <%= form.label :drive_id, "Google Drive ID", class: "form-label fw-bold" %>
             <div class="input-group shadow-sm">
               <span class="input-group-text bg-light border-end-0"><i class="fab fa-google-drive text-danger"></i></span>
-              <%= form.text_field :drive_id, class: 'form-control border-start-0', placeholder: "Nhập ID thư mục Google Drive", style: "padding-left: 0;" %>
+              <%= form.text_field :drive_id, class: 'form-control border-start-0', placeholder: "Enter Google Drive folder ID", style: "padding-left: 0;" %>
             </div>
-            <small class="text-muted">ID thư mục Drive sử dụng để lấy hình ảnh tự động</small>
+            <small class="text-muted">Drive folder ID used to automatically fetch images</small>
           </div>
         </div>
       </div>
@@ -121,10 +121,10 @@
 
   <div class="d-flex justify-content-between align-items-center mt-4">
     <%= link_to projects_path, class: 'btn btn-secondary shadow-sm' do %>
-      <i class="fas fa-arrow-left me-1"></i> Quay lại
+      <i class="fas fa-arrow-left me-1"></i> Back
     <% end %>
     <button type="submit" class="btn btn-primary shadow-sm" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0); border: none;">
-      <i class="fas fa-save me-1"></i> <%= project.new_record? ? "Tạo dự án" : "Cập nhật dự án" %>
+      <i class="fas fa-save me-1"></i> <%= project.new_record? ? "Create Project" : "Update Project" %>
     </button>
   </div>
 <% end %> 

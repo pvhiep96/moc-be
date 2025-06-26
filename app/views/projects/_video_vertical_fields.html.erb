@@ -19,7 +19,7 @@
     </div>
 
     <div class="form-group mb-3" data-controller="video-file">
-      <%= f.label :video_file, "Tải lên File Video", class: "form-label fw-semibold" %>
+      <%= f.label :video_file, "Upload Video File", class: "form-label fw-semibold" %>
       <%= f.file_field :video_file,
           class: "form-control",
           accept: "video/mp4,video/quicktime,video/x-msvideo,video/x-flv,video/webm",
@@ -28,7 +28,7 @@
             action: "change->video-file#previewVideo"
           } %>
       <div class="form-text">
-        Định dạng hỗ trợ: MP4, MOV, AVI, FLV, WEBM. Kích thước tối đa: 500MB.
+        Supported formats: MP4, MOV, AVI, FLV, WEBM. Maximum size: 500MB.
       </div>
 
       <% if f.object.errors[:video_file].any? %>
@@ -43,13 +43,13 @@
         <% if f.object.video_file&.attached? && !f.object.video_file.blob.new_record? %>
           <div class="mt-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <p class="mb-0">File video hiện tại: <strong><%= f.object.video_file.filename %></strong></p>
+              <p class="mb-0">Current video file: <strong><%= f.object.video_file.filename %></strong></p>
               <span class="badge bg-info"><%= number_to_human_size(f.object.video_file.byte_size) %></span>
             </div>
             <div class="ratio ratio-9x16">
               <video controls class="w-100">
                 <source src="<%= url_for(f.object.video_file) %>" type="<%= f.object.video_file.content_type %>">
-                Trình duyệt của bạn không hỗ trợ thẻ video.
+                Your browser does not support the video tag.
               </video>
             </div>
           </div>
@@ -60,11 +60,11 @@
     <% if f.object.persisted? %>
       <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Xóa video này" %>
+        <%= f.label :_destroy, "Delete this video" %>
       </div>
     <% else %>
       <div class="form-group mt-2">
-        <%= link_to_remove_association "Xóa", f, class: 'btn btn-danger btn-sm' %>
+        <%= link_to_remove_association "Delete", f, class: 'btn btn-danger btn-sm' %>
       </div>
     <% end %>
   </div>

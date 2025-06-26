@@ -1,16 +1,16 @@
 <div class="nested-fields card mb-3">
   <div class="card-body">
     <div class="form-group mb-3">
-      <%= f.label :url, "URL Video YouTube", class: "form-label fw-semibold" %>
+      <%= f.label :url, "YouTube Video URL", class: "form-label fw-semibold" %>
       <%= f.text_field :url,
           class: "form-control",
-          placeholder: "Nhập URL video YouTube (ví dụ: https://www.youtube.com/watch?v=VIDEO_ID)",
+          placeholder: "Enter YouTube video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)",
           data: {
             controller: "video-url",
             action: "input->video-url#validateUrl"
           } %>
       <div class="mt-3" data-video-url-target="preview"></div>
-      <div class="form-text">Nhập một URL YouTube hợp lệ (ví dụ: https://www.youtube.com/watch?v=VIDEO_ID)</div>
+      <div class="form-text">Enter a valid YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)</div>
 
       <% if f.object.errors[:url].any? %>
         <div class="alert alert-danger mt-2">
@@ -24,11 +24,11 @@
     <% if f.object.persisted? %>
       <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Xóa URL video này" %>
+        <%= f.label :_destroy, "Delete this video URL" %>
       </div>
     <% else %>
       <div class="form-group mt-2">
-        <%= link_to_remove_association "Xóa", f, class: 'btn btn-danger btn-sm' %>
+        <%= link_to_remove_association "Delete", f, class: 'btn btn-danger btn-sm' %>
       </div>
     <% end %>
   </div>

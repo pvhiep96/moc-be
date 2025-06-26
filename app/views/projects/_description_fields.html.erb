@@ -1,9 +1,9 @@
 <div class="nested-fields card mb-3">
   <div class="card-body">
     <div class="form-group mb-3">
-      <%= f.label :content, "Nội dung", class: "form-label fw-semibold" %>
+      <%= f.label :content, "Content", class: "form-label fw-semibold" %>
       <%= f.text_area :content, class: 'form-control tinymce', rows: 5 %>
-      <div class="form-text">Sử dụng trình soạn thảo để định dạng nội dung</div>
+      <div class="form-text">Use the editor to format content</div>
 
       <% if f.object.errors[:content].any? %>
         <div class="alert alert-danger mt-2">
@@ -17,11 +17,11 @@
     <% if f.object.persisted? %>
       <div class="form-group mt-2">
         <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Xóa mô tả này" %>
+        <%= f.label :_destroy, "Delete this description" %>
       </div>
     <% else %>
       <div class="form-group mt-2">
-        <%= link_to_remove_association "Xóa", f, class: 'btn btn-danger btn-sm' %>
+        <%= link_to_remove_association "Delete", f, class: 'btn btn-danger btn-sm' %>
       </div>
     <% end %>
   </div>

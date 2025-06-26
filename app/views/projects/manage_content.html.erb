@@ -2,39 +2,39 @@
   <div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><%= link_to 'Trang chủ', projects_path %></li>
-        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Home', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Projects', projects_path %></li>
         <li class="breadcrumb-item"><%= link_to @project.name, @project %></li>
-        <li class="breadcrumb-item active" aria-current="page">Quản lý thứ tự hiển thị</li>
+        <li class="breadcrumb-item active" aria-current="page">Manage Display Order</li>
       </ol>
     </nav>
-    <h2 class="mt-2 mb-0"><%= @project.name %> - Quản lý thứ tự hiển thị</h2>
+    <h2 class="mt-2 mb-0"><%= @project.name %> - Manage Display Order</h2>
   </div>
 </div>
 
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-header bg-white py-3">
-    <h5 class="mb-0">Sắp xếp thứ tự hiển thị</h5>
-    <p class="text-muted mb-0 small">Kéo thả để sắp xếp thứ tự hiển thị của ảnh, mô tả và video trong dự án</p>
+    <h5 class="mb-0">Arrange Display Order</h5>
+    <p class="text-muted mb-0 small">Drag and drop to arrange the display order of images, descriptions and videos in the project</p>
   </div>
   <div class="card-body">
     <%= form_with(url: update_content_project_path(@project), method: :post, local: true, id: "content-order-form") do |form| %>
       <div class="mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="mb-0">Thứ tự hiển thị nội dung</h6>
+          <h6 class="mb-0">Content Display Order</h6>
           <div>
             <button type="button" class="btn btn-sm btn-outline-secondary" id="collapse-all-btn">
-              <i class="fas fa-compress-alt me-1"></i> Thu gọn tất cả
+              <i class="fas fa-compress-alt me-1"></i> Collapse All
             </button>
             <button type="button" class="btn btn-sm btn-outline-primary" id="expand-all-btn">
-              <i class="fas fa-expand-alt me-1"></i> Mở rộng tất cả
+              <i class="fas fa-expand-alt me-1"></i> Expand All
             </button>
           </div>
         </div>
 
         <div class="alert alert-info mb-3">
           <i class="fas fa-info-circle me-2"></i>
-          Kéo thả các mục để thay đổi thứ tự hiển thị. Thứ tự từ trên xuống dưới sẽ là thứ tự hiển thị trong dự án.
+          Drag and drop items to change the display order. The order from top to bottom will be the display order in the project.
         </div>
 
         <div class="content-container" id="sortable-content">
@@ -49,9 +49,9 @@
                       </div>
                       <h6 class="mb-0">
                         <% if item[:type] == 'ProjectImage' %>
-                          <i class="fas fa-image text-primary me-1"></i> Ảnh
+                          <i class="fas fa-image text-primary me-1"></i> Image
                         <% elsif item[:type] == 'Description' %>
-                          <i class="fas fa-align-left text-success me-1"></i> Mô tả
+                          <i class="fas fa-align-left text-success me-1"></i> Description
                         <% elsif item[:type] == 'VideoUrl' %>
                           <i class="fas fa-video text-danger me-1"></i> Video
                         <% end %>
@@ -87,13 +87,13 @@
                               <% else %>
                                 <div class="alert alert-warning">
                                   <i class="fas fa-exclamation-triangle me-2"></i>
-                                  Không thể hiển thị video. URL: <%= item[:content].url %>
+                                  Cannot display video. URL: <%= item[:content].url %>
                                 </div>
                               <% end %>
                             <% else %>
                               <div class="alert alert-info">
                                 <i class="fas fa-link me-2"></i>
-                                URL Video: <%= item[:content].url %>
+                                Video URL: <%= item[:content].url %>
                               </div>
                             <% end %>
                           </div>
@@ -108,29 +108,29 @@
           <% else %>
             <div class="alert alert-warning">
               <i class="fas fa-exclamation-triangle me-2"></i>
-              Chưa có nội dung nào được chọn. Vui lòng thêm ảnh, mô tả hoặc video cho dự án.
+              No content has been selected yet. Please add images, descriptions or videos for the project.
             </div>
           <% end %>
         </div>
       </div>
 
       <div class="mt-4">
-        <h6 class="mb-3">Nội dung chưa được sắp xếp</h6>
+        <h6 class="mb-3">Unsorted Content</h6>
 
         <ul class="nav nav-tabs" id="unorderedContentTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
-              <i class="fas fa-image me-1"></i> Ảnh (<%= @unordered_images.count %>)
+              <i class="fas fa-image me-1"></i> Images (<%= @unordered_images.count %>)
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
-              <i class="fas fa-align-left me-1"></i> Mô tả (<%= @unordered_descriptions.count %>)
+              <i class="fas fa-align-left me-1"></i> Descriptions (<%= @unordered_descriptions.count %>)
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-controls="videos-content" aria-selected="false">
-              <i class="fas fa-video me-1"></i> Video (<%= @unordered_videos.count %>)
+              <i class="fas fa-video me-1"></i> Videos (<%= @unordered_videos.count %>)
             </button>
           </li>
         </ul>
@@ -155,7 +155,7 @@
             <% else %>
               <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Không có ảnh nào chưa được sắp xếp.
+                No unsorted images.
               </div>
             <% end %>
           </div>
@@ -183,7 +183,7 @@
             <% else %>
               <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Không có mô tả nào chưa được sắp xếp.
+                No unsorted descriptions.
               </div>
             <% end %>
           </div>
@@ -198,19 +198,17 @@
                         <% if video.url.include?('youtube') %>
                           <% video_id = video.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/) %>
                           <% if video_id %>
-                            <div class="embed-responsive">
-                              <iframe width="100%" height="150" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                            </div>
+                            <iframe width="100%" height="200" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                           <% else %>
                             <div class="alert alert-warning">
                               <i class="fas fa-exclamation-triangle me-2"></i>
-                              Không thể hiển thị video
+                              Cannot display video. URL: <%= video.url %>
                             </div>
                           <% end %>
                         <% else %>
                           <div class="alert alert-info">
                             <i class="fas fa-link me-2"></i>
-                            URL Video: <%= video.url %>
+                            Video URL: <%= video.url %>
                           </div>
                         <% end %>
                       </div>
@@ -226,7 +224,7 @@
             <% else %>
               <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Không có video nào chưa được sắp xếp.
+                No unsorted videos.
               </div>
             <% end %>
           </div>
@@ -234,12 +232,11 @@
       </div>
 
       <div class="d-flex justify-content-between align-items-center mt-4">
-        <%= link_to @project, class: 'btn btn-secondary' do %>
-          <i class="fas fa-arrow-left me-1"></i> Quay lại
+        <%= link_to project_path(@project), class: 'btn btn-secondary' do %>
+          <i class="fas fa-arrow-left me-1"></i> Back to Project
         <% end %>
-
         <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save me-1"></i> Lưu thứ tự hiển thị
+          <i class="fas fa-save me-1"></i> Save Changes
         </button>
       </div>
     <% end %>
@@ -310,7 +307,7 @@
     });
   }
 
-  // Hàm cập nhật content_position khi kéo thả
+  // Function to update content_position when dragging and dropping
   function updateContentPositions() {
     const contentItems = document.querySelectorAll('#sortable-content .content-item');
     const positions = [];
@@ -327,10 +324,10 @@
 
     console.log('Updating content positions:', positions);
 
-    // Lấy CSRF token từ meta tag
+    // Get CSRF token from meta tag
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Gửi AJAX request để cập nhật thứ tự
+    // Send AJAX request to update order
     fetch(`/projects/<%= @project.id %>/update_content_positions`, {
       method: 'POST',
       headers: {
@@ -347,19 +344,19 @@
     })
     .then(data => {
       console.log('Content positions updated successfully:', data);
-      // Hiển thị thông báo thành công
-      showNotification('Thứ tự đã được cập nhật thành công!', 'success');
+      // Show success notification
+      showNotification('Content order updated successfully!', 'success');
     })
     .catch(error => {
       console.error('Error updating content positions:', error);
-      // Hiển thị thông báo lỗi
-      showNotification('Có lỗi xảy ra khi cập nhật thứ tự!', 'error');
+      // Show error notification
+      showNotification('An error occurred while updating content order!', 'error');
     });
   }
 
-  // Hàm hiển thị thông báo
+  // Function to show notification
   function showNotification(message, type) {
-    // Tạo thông báo Bootstrap
+    // Create Bootstrap notification
     const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
     const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
     
@@ -373,7 +370,7 @@
     
     document.body.appendChild(notification);
     
-    // Tự động ẩn sau 3 giây
+    // Auto hide after 3 seconds
     setTimeout(() => {
       if (notification.parentNode) {
         notification.remove();
@@ -381,7 +378,7 @@
     }, 3000);
   }
 
-  // Khởi tạo Sortable khi DOMContentLoaded hoặc Turbo load
+  // Initialize Sortable when DOMContentLoaded or Turbo load
   function readySortable() {
     setTimeout(initSortable, 100);
   }
@@ -389,18 +386,18 @@
   document.addEventListener('turbo:load', readySortable);
   document.addEventListener('turbo:render', readySortable);
 
-  // Xử lý nút thu gọn tất cả
+  // Handle collapse all button
   const collapseAllBtn = document.getElementById('collapse-all-btn');
   if (collapseAllBtn) {
     collapseAllBtn.addEventListener('click', function() {
       const collapseElements = document.querySelectorAll('#sortable-content .collapse');
       collapseElements.forEach(collapse => {
-        // Sử dụng Bootstrap collapse API
+        // Use Bootstrap collapse API
         if (window.bootstrap && bootstrap.Collapse) {
           const bsCollapse = new bootstrap.Collapse(collapse);
           bsCollapse.hide();
         } else {
-          // Fallback nếu không có Bootstrap JS
+          // Fallback if no Bootstrap JS
           collapse.classList.remove('show');
         }
       });
@@ -412,18 +409,18 @@
     });
   }
 
-  // Xử lý nút mở rộng tất cả
+  // Handle expand all button
   const expandAllBtn = document.getElementById('expand-all-btn');
   if (expandAllBtn) {
     expandAllBtn.addEventListener('click', function() {
       const collapseElements = document.querySelectorAll('#sortable-content .collapse');
       collapseElements.forEach(collapse => {
-        // Sử dụng Bootstrap collapse API
+        // Use Bootstrap collapse API
         if (window.bootstrap && bootstrap.Collapse) {
           const bsCollapse = new bootstrap.Collapse(collapse);
           bsCollapse.show();
         } else {
-          // Fallback nếu không có Bootstrap JS
+          // Fallback if no Bootstrap JS
           collapse.classList.add('show');
         }
       });
@@ -435,7 +432,7 @@
     });
   }
 
-  // Xử lý nút toggle nội dung
+  // Handle content toggle button
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('toggle-content') || e.target.closest('.toggle-content')) {
       const button = e.target.classList.contains('toggle-content') ? e.target : e.target.closest('.toggle-content');
@@ -453,11 +450,11 @@
     }
   });
 
-  // Xử lý nút xóa nội dung
+  // Handle remove content button
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('remove-content') || e.target.closest('.remove-content')) {
-      e.preventDefault(); // Ngăn chặn hành vi mặc định
-      e.stopPropagation(); // Ngăn chặn sự kiện lan truyền
+      e.preventDefault(); // Prevent default behavior
+      e.stopPropagation(); // Stop event propagation
 
       const button = e.target.classList.contains('remove-content') ? e.target : e.target.closest('.remove-content');
       const contentId = button.getAttribute('data-id');
@@ -465,38 +462,38 @@
 
       console.log('Removing content:', contentId, contentType);
 
-      // Tìm phần tử cha cần xóa
+      // Find parent element to remove
       const contentItem = button.closest('.content-item');
       if (contentItem) {
-        // Xóa phần tử khỏi danh sách đã sắp xếp
+        // Remove element from sorted list
         contentItem.remove();
 
-        // Cập nhật số thứ tự
+        // Update order numbers
         updateOrderNumbers();
 
-        // Khởi tạo lại Sortable.js sau khi xóa phần tử
+        // Reinitialize Sortable.js after removing element
         initSortable();
 
-        // Cập nhật content_position sau khi xóa
+        // Update content_position after removing
         updateContentPositions();
 
-        // Thêm lại vào danh sách chưa sắp xếp
+        // Add back to unordered list
         addToUnorderedList(contentId, contentType);
       }
     }
   });
 
-  // Xử lý nút thêm vào danh sách đã sắp xếp
+  // Handle add to ordered list button
   document.addEventListener('click', function(e) {
     if (e.target.classList.contains('add-to-order') || e.target.closest('.add-to-order')) {
       const button = e.target.classList.contains('add-to-order') ? e.target : e.target.closest('.add-to-order');
       const contentId = button.dataset.id;
       const contentType = button.dataset.type;
 
-      // Tìm phần tử cha cần xóa khỏi danh sách chưa sắp xếp
+      // Find parent element to remove from unordered list
       const unorderedItem = button.closest('.unordered-item');
       if (unorderedItem) {
-        // Lấy thông tin cần thiết trước khi xóa
+        // Get necessary information before removing
         let contentHtml = '';
         let contentPreview = '';
 
@@ -518,48 +515,48 @@
           contentHtml = unorderedItem.querySelector('.card-body').innerHTML;
         }
 
-        // Xóa phần tử khỏi danh sách chưa sắp xếp
+        // Remove element from unordered list
         unorderedItem.remove();
 
-        // Thêm vào danh sách đã sắp xếp
+        // Add to ordered list
         addToOrderedList(contentId, contentType, contentHtml);
 
-        // Cập nhật content_position sau khi thêm
+        // Update content_position after adding
         updateContentPositions();
       }
     }
   });
 
-  // Hàm thêm nội dung vào danh sách đã sắp xếp
+  // Function to add content to ordered list
   function addToOrderedList(contentId, contentType, contentHtml) {
     const sortableContainer = document.getElementById('sortable-content');
     if (!sortableContainer) return;
 
-    // Tạo phần tử mới
+    // Create new element
     const newItem = document.createElement('div');
     newItem.className = 'content-item mb-3';
     newItem.dataset.id = contentId;
     newItem.dataset.type = contentType;
 
-    // Xác định icon và tên loại nội dung
+    // Determine icon and content type name
     let iconClass = '';
     let typeName = '';
 
     if (contentType === 'ProjectImage') {
       iconClass = 'fas fa-image text-primary';
-      typeName = 'Ảnh';
+      typeName = 'Image';
     } else if (contentType === 'Description') {
       iconClass = 'fas fa-align-left text-success';
-      typeName = 'Mô tả';
+      typeName = 'Description';
     } else if (contentType === 'VideoUrl') {
       iconClass = 'fas fa-video text-danger';
       typeName = 'Video';
     }
 
-    // Lấy số thứ tự mới
+    // Get new order number
     const newIndex = sortableContainer.querySelectorAll('.content-item').length + 1;
 
-    // Tạo HTML cho phần tử mới
+    // Create HTML for new element
     newItem.innerHTML = `
       <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
@@ -590,24 +587,24 @@
       </div>
     `;
 
-    // Thêm vào container
+    // Add to container
     sortableContainer.appendChild(newItem);
 
-    // Xóa thông báo nếu không còn
+    // Remove warning if no more
     const warningAlert = sortableContainer.querySelector('.alert-warning');
     if (warningAlert) {
       warningAlert.remove();
     }
 
-    // Khởi tạo lại Sortable.js sau khi thêm phần tử mới
+    // Reinitialize Sortable.js after adding new element
     initSortable();
   }
 
-  // Hàm thêm nội dung vào danh sách chưa sắp xếp
+  // Function to add content to unordered list
   function addToUnorderedList(contentId, contentType) {
     console.log('Adding to unordered list:', contentId, contentType);
 
-    // Tìm container tương ứng
+    // Find corresponding container
     let container;
     if (contentType === 'ProjectImage') {
       container = document.getElementById('unordered-images-container');
@@ -622,10 +619,10 @@
       return;
     }
 
-    // Tìm nội dung trong danh sách đã sắp xếp
+    // Find content in ordered list
     const contentItem = document.querySelector(`.content-item[data-id="${contentId}"][data-type="${contentType}"]`);
     if (contentItem) {
-      // Tạo phần tử mới cho danh sách chưa sắp xếp
+      // Create new element for unordered list
       const newItem = document.createElement('div');
 
       if (contentType === 'ProjectImage') {
@@ -685,16 +682,16 @@
         newItem.dataset.id = contentId;
         newItem.dataset.type = contentType;
 
-        // Thêm vào container
+        // Add to container
         container.appendChild(newItem);
 
-        // Xóa thông báo nếu có
+        // Remove notification if exists
         const infoAlert = container.querySelector('.alert-info');
         if (infoAlert) {
           infoAlert.remove();
         }
 
-        // Chuyển tab tương ứng thành active
+        // Switch to corresponding tab as active
         if (contentType === 'ProjectImage') {
           const tab = document.getElementById('images-tab');
           if (tab && typeof bootstrap !== 'undefined') {
@@ -725,11 +722,11 @@
       }
     }
 
-    // Nếu không tìm thấy trong DOM, thì mới gọi API
-    // Tạo phần tử mới cho danh sách chưa sắp xếp
+    // If not found in DOM, then call API
+    // Create new element for unordered list
     const newItem = document.createElement('div');
 
-    // Lấy thông tin từ API
+    // Get information from API
     fetch(`/projects/<%= @project.id %>/content_item?type=${contentType}&id=${contentId}`)
       .then(response => {
         if (!response.ok) {
@@ -782,7 +779,7 @@
               videoContent = `
                 <div class="alert alert-warning">
                   <i class="fas fa-exclamation-triangle me-2"></i>
-                  Không thể hiển thị video
+                  Cannot display video
                 </div>
               `;
             }
@@ -790,7 +787,7 @@
             videoContent = `
               <div class="alert alert-info">
                 <i class="fas fa-link me-2"></i>
-                URL Video: ${data.url}
+                Video URL: ${data.url}
               </div>
             `;
           }
@@ -812,16 +809,16 @@
         newItem.dataset.id = contentId;
         newItem.dataset.type = contentType;
 
-        // Thêm vào container
+        // Add to container
         container.appendChild(newItem);
 
-        // Xóa thông báo nếu có
+        // Remove notification if exists
         const infoAlert = container.querySelector('.alert-info');
         if (infoAlert) {
           infoAlert.remove();
         }
 
-        // Chuyển tab tương ứng thành active
+        // Switch to corresponding tab as active
         if (contentType === 'ProjectImage') {
           const tab = document.getElementById('images-tab');
           if (tab && typeof bootstrap !== 'undefined') {
@@ -850,7 +847,7 @@
       })
       .catch(error => {
         console.error('Error fetching content item:', error);
-        // Không hiển thị alert ở đây nữa
+        // Don't show alert here anymore
       });
   }
 </script>
