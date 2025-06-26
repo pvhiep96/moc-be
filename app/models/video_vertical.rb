@@ -19,7 +19,7 @@ class VideoVertical < ApplicationRecord
     if video_file.attached? && !video_file.blob.new_record?
       begin
         host = if Rails.env.production?
-                 'https://47.129.243.193:3006'
+                 'https://mocproductions.com/'
                else
                  nil # Will use relative URL in development
                end

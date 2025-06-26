@@ -7,7 +7,7 @@ module Api
         if video_vertical.video_file.attached? && !video_vertical.video_file.blob.new_record?
           begin
             host = if Rails.env.production?
-                     'https://47.129.243.193:3006'
+                     'https://mocproductions.com/'
                    else
                      ActionController::Base.asset_host ||
                        "#{_options[:env]['rack.url_scheme']}://#{_options[:env]['HTTP_HOST']}"

@@ -44,7 +44,7 @@ Rails.application.configure do
 
   # Set the host for URL generation
   config.active_storage.resolve_model_to_route = :rails_storage_redirect
-  Rails.application.routes.default_url_options[:host] = 'https://47.129.243.193:3006'
+  Rails.application.routes.default_url_options[:host] = 'https://mocproductions.com/'
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
