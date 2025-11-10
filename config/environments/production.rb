@@ -88,6 +88,17 @@ Rails.application.configure do
   # require "syslog/logger"
   # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new "app-name")
 
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: 'smtp.gmail.com',
+    port: 587,
+    domain: 'mocproductions.com',
+    user_name: ENV['GMAIL_USERNAME'], # Use environment variable for security
+    password: ENV['GMAIL_PASSWORD'], # Use environment variable for security
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
+
   if ENV['RAILS_LOG_TO_STDOUT'].present?
     logger           = ActiveSupport::Logger.new(STDOUT)
     logger.formatter = config.log_formatter

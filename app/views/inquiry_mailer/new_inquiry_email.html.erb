@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h2>New Inquiry Received!</h2>
+    <p><strong>Name:</strong> <%= @inquiry.full_name %></p>
+    <p><strong>Email:</strong> <%= @inquiry.email %></p>
+    <p><strong>Location:</strong> <%= @inquiry.location %></p>
+    <p><strong>Event Type:</strong> <%= @inquiry.event_type %></p>
+    <p><strong>Event Date:</strong> <%= @inquiry.event_date&.strftime('%B %d, %Y') %></p>
+    <p><strong>Message:</strong></p>
+    <blockquote><%= simple_format(@inquiry.message) %></blockquote>
+
+    <hr>
+    <small>Sent from YourApp API at <%= Time.current %></small>
+  </body>
+</html>

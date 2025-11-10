@@ -1,0 +1,14 @@
+# app/views/inquiry_mailer/new_inquiry_email.text.erb
+New Inquiry Received!
+
+Name: <%= @inquiry.full_name %>
+Email: <%= @inquiry.email %>
+Location: <%= @inquiry.location %>
+Event Type: <%= @inquiry.event_type %>
+Event Date: <%= @inquiry.event_date&.strftime('%B %d, %Y') %>
+
+Message:
+<%= @inquiry.message %>
+
+---
+Sent from YourApp API at <%= Time.current %>

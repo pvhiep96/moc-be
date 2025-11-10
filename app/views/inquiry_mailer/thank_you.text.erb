@@ -1,0 +1,13 @@
+# app/views/inquiry_mailer/thank_you.text.erb
+Thank You, <%= @inquiry.full_name %>!
+
+We’ve received your inquiry and will get back to you soon.
+
+Event: <%= @inquiry.event_type || "Not specified" %>
+Date: <%= @inquiry.event_date&.strftime("%B %d, %Y") || "TBD" %>
+
+Message:
+<%= @inquiry.message %>
+
+We’ll reply within 24 hours.
+— The Team

@@ -4,6 +4,7 @@ module Api
       version 'v1', using: :path
 
       mount Api::V1::Projects
+      mount Api::V1::Inquiries
     end
   end
 end
