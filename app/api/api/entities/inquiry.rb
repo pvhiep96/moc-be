@@ -8,14 +8,14 @@ module Api
       expose :location
       expose :event_type
       expose :role
-      expose :event_date, format_with: :iso8601
+      expose :event_date
       expose :event_location
       expose :budget
       expose :instagram
       expose :source
       expose :message
-      expose :created_at, format_with: :iso8601
-      expose :updated_at, format_with: :iso8601
+      expose :created_at
+      expose :updated_at
     end
   end
 end
