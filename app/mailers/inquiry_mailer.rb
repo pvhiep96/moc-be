@@ -1,12 +1,12 @@
 # app/mailers/inquiry_mailer.rb
 class InquiryMailer < ApplicationMailer
   # default from: "Your App <noreply@yourapp.com>"
-  default from: "Moc Productions <info@mocproductions.com>"
+  default from: "Moc Productions <info@mocnguyenproductions.com>"
 
   def new_inquiry_email(inquiry)
     @inquiry = inquiry
     mail(
-      to: "admin@yourapp.com",  # Change to your admin email
+      to: "info@mocnguyenproductions.com",  # Change to your admin email
       subject: "New Inquiry: #{@inquiry.full_name} (#{@inquiry.event_type})"
     )
   end
