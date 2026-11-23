@@ -5,6 +5,7 @@ module Api
 
       mount Api::V1::Projects
       mount Api::V1::Inquiries
+      mount Api::V1::SiteContent
     end
   end
 end

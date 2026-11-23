@@ -1,0 +1,74 @@
+<div class="container-fluid px-2 py-2">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+      <%= link_to inquiries_path, class: "btn btn-sm btn-outline-secondary mb-2" do %>
+        <i class="fas fa-arrow-left me-1"></i>Quay lại Hộp thư
+      <% end %>
+      <h3 class="fw-bold mb-0">Chi tiết liên hệ: <%= @inquiry.full_name %></h3>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="mailto:<%= @inquiry.email %>?subject=Re: MOC Productions Inquiry" class="btn btn-primary">
+        <i class="fas fa-reply me-1"></i>Phản hồi qua Email
+      </a>
+      <%= button_to inquiry_path(@inquiry),
+          method: :delete,
+          class: "btn btn-outline-danger",
+          form: { data: { turbo_confirm: "Xóa liên hệ của \"#{@inquiry.full_name}\"?" } } do %>
+        <i class="fas fa-trash me-1"></i>Xóa
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header fw-bold">Thông tin khách hàng & Sự kiện</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-5 text-muted">Họ và tên:</dt>
+            <dd class="col-sm-7 fw-semibold"><%= @inquiry.full_name %></dd>
+
+            <dt class="col-sm-5 text-muted">Email:</dt>
+            <dd class="col-sm-7"><a href="mailto:<%= @inquiry.email %>"><%= @inquiry.email %></a></dd>
+
+            <dt class="col-sm-5 text-muted">Nơi ở:</dt>
+            <dd class="col-sm-7"><%= @inquiry.location.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Vai trò:</dt>
+            <dd class="col-sm-7"><%= @inquiry.role.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Loại sự kiện:</dt>
+            <dd class="col-sm-7"><%= @inquiry.event_type.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Ngày sự kiện:</dt>
+            <dd class="col-sm-7"><%= @inquiry.event_date ? @inquiry.event_date.strftime("%d/%m/%Y") : "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Địa điểm sự kiện:</dt>
+            <dd class="col-sm-7"><%= @inquiry.event_location.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Ngân sách dự kiến:</dt>
+            <dd class="col-sm-7"><span class="badge bg-success-subtle text-success"><%= @inquiry.budget.presence || "—" %></span></dd>
+
+            <dt class="col-sm-5 text-muted">Instagram:</dt>
+            <dd class="col-sm-7"><%= @inquiry.instagram.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Biết đến qua:</dt>
+            <dd class="col-sm-7"><%= @inquiry.source.presence || "—" %></dd>
+
+            <dt class="col-sm-5 text-muted">Thời gian gửi:</dt>
+            <dd class="col-sm-7"><%= @inquiry.created_at.strftime("%d/%m/%Y %H:%M") %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header fw-bold">Nội dung lời nhắn</div>
+        <div class="card-body">
+          <div class="p-3 bg-light rounded border" style="white-space: pre-wrap; line-height: 1.6;"><%= @inquiry.message %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

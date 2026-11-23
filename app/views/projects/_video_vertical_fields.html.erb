@@ -1,70 +1,100 @@
-<div class="nested-fields mb-3">
+<% has_uploaded_file = f.object.video_file&.attached? && !f.object.video_file.blob.new_record? %>
+<div class="nested-fields card border"
+     data-controller="video-vertical"
+     data-video-vertical-has-file-value="<%= has_uploaded_file %>">
   <div class="card-body">
-    <% if f.object.errors[:base].any? %>
-      <div class="alert alert-danger mb-3">
-        <% f.object.errors[:base].each do |error| %>
+    <% if f.object.errors[:base].any? || f.object.errors[:url].any? %>
+      <div class="alert alert-danger py-2 mb-3">
+        <% (f.object.errors[:base] + f.object.errors[:url]).each do |error| %>
           <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
         <% end %>
       </div>
     <% end %>
 
-    <div class="form-group mb-3">
-      <% if f.object.errors[:url].any? %>
-        <div class="alert alert-danger mt-2">
-          <% f.object.errors[:url].each do |error| %>
-            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
-          <% end %>
-        </div>
-      <% end %>
+    <!-- Chọn 1 trong 2 cách cung cấp video -->
+    <div class="mb-3">
+      <label class="form-label fw-semibold d-block">Nguồn video <span class="text-muted fw-normal">(chọn 1 trong 2)</span></label>
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="video_vertical_mode" id="vertical-mode-file"
+               data-video-vertical-target="fileRadio"
+               data-action="change->video-vertical#toggle">
+        <label class="btn btn-outline-primary" for="vertical-mode-file">
+          <i class="fas fa-upload me-1"></i>Tải file lên
+        </label>
+
+        <input type="radio" class="btn-check" name="video_vertical_mode" id="vertical-mode-url"
+               data-video-vertical-target="urlRadio"
+               data-action="change->video-vertical#toggle">
+        <label class="btn btn-outline-primary" for="vertical-mode-url">
+          <i class="fab fa-youtube me-1"></i>Dán link YouTube
+        </label>
+      </div>
     </div>
 
-    <div class="form-group mb-3" data-controller="video-file">
-      <%= f.label :video_file, "Upload Video File", class: "form-label fw-semibold" %>
-      <%= f.file_field :video_file,
-          class: "form-control",
-          accept: "video/mp4,video/quicktime,video/x-msvideo,video/x-flv,video/webm",
-          data: {
-            video_file_target: "input",
-            action: "change->video-file#previewVideo"
-          } %>
-      <div class="form-text">
-        Supported formats: MP4, MOV, AVI, FLV, WEBM. Maximum size: 500MB.
-      </div>
-
-      <% if f.object.errors[:video_file].any? %>
-        <div class="alert alert-danger mt-2">
-          <% f.object.errors[:video_file].each do |error| %>
-            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
-          <% end %>
+    <!-- Cách 1: upload file -->
+    <div data-video-vertical-target="fileSection">
+      <div class="form-group mb-3" data-controller="video-file">
+        <%= f.label :video_file, "File video (định dạng dọc 9:16)", class: "form-label" %>
+        <%= f.file_field :video_file,
+            class: "form-control",
+            accept: "video/mp4,video/quicktime,video/x-msvideo,video/x-flv,video/webm",
+            data: {
+              video_file_target: "input",
+              action: "change->video-file#previewVideo"
+            } %>
+        <div class="form-text">
+          Định dạng hỗ trợ: MP4, MOV, AVI, FLV, WEBM — tối đa 500MB.
+          Với file lớn, quá trình lưu có thể mất vài phút, vui lòng không đóng trang.
         </div>
-      <% end %>
 
-      <div data-video-file-target="preview">
-        <% if f.object.video_file&.attached? && !f.object.video_file.blob.new_record? %>
-          <div class="mt-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <p class="mb-0">Current video file: <strong><%= f.object.video_file.filename %></strong></p>
-              <span class="badge bg-info"><%= number_to_human_size(f.object.video_file.byte_size) %></span>
-            </div>
-            <div class="ratio ratio-9x16">
-              <video controls class="w-100">
-                <source src="<%= url_for(f.object.video_file) %>" type="<%= f.object.video_file.content_type %>">
-                Your browser does not support the video tag.
-              </video>
-            </div>
+        <% if f.object.errors[:video_file].any? %>
+          <div class="alert alert-danger py-2 mt-2">
+            <% f.object.errors[:video_file].each do |error| %>
+              <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+            <% end %>
           </div>
         <% end %>
+
+        <div data-video-file-target="preview">
+          <% if has_uploaded_file %>
+            <div class="mt-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <p class="mb-0">File hiện tại: <strong><%= f.object.video_file.filename %></strong></p>
+                <span class="badge bg-info"><%= number_to_human_size(f.object.video_file.byte_size) %></span>
+              </div>
+              <div class="ratio ratio-9x16" style="max-width: 240px;">
+                <video controls class="w-100">
+                  <source src="<%= url_for(f.object.video_file) %>" type="<%= f.object.video_file.content_type %>">
+                  Trình duyệt không hỗ trợ phát video.
+                </video>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cách 2: link YouTube -->
+    <div data-video-vertical-target="urlSection" data-controller="video-url">
+      <div class="form-group mb-3">
+        <%= f.label :url, "Link video YouTube (định dạng dọc)", class: "form-label" %>
+        <%= f.text_field :url,
+            class: "form-control",
+            placeholder: "https://www.youtube.com/shorts/...",
+            data: {
+              video_vertical_target: "urlInput",
+              video_url_target: "input",
+              action: "input->video-url#validateUrl"
+            } %>
+        <div data-video-url-target="feedback"></div>
+        <div data-video-url-target="preview"></div>
       </div>
     </div>
 
     <% if f.object.persisted? %>
-      <div class="form-group mt-2">
-        <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Delete this video" %>
-      </div>
-    <% else %>
-      <div class="form-group mt-2">
-        <%= link_to_remove_association "Delete", f, class: 'btn btn-danger btn-sm' %>
+      <div class="form-check mt-2 pt-2 border-top">
+        <%= f.check_box :_destroy, class: "form-check-input" %>
+        <%= f.label :_destroy, "Xóa video dọc này khi lưu", class: "form-check-label text-danger" %>
       </div>
     <% end %>
   </div>

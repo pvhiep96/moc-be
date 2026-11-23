@@ -1,0 +1,52 @@
+<%# Thẻ nội dung ở khu "Đang ẩn". locals: content, type %>
+<div class="col-6 col-sm-4 col-md-3"
+     data-content-key="<%= type %>-<%= content.id %>"
+     data-id="<%= content.id %>"
+     data-type="<%= type %>">
+  <div class="card h-100 border shadow-none">
+    <% case type %>
+    <% when 'ProjectImage' %>
+      <div class="position-relative bg-dark" style="aspect-ratio: 4/3;">
+        <img src="<%= content.image_url %>"
+             class="w-100 h-100 rounded-top"
+             style="object-fit: contain;"
+             alt="Ảnh dự án"
+             loading="lazy">
+      </div>
+    <% when 'Description' %>
+      <div class="card-body p-2">
+        <div class="small fw-semibold text-success mb-1"><i class="fas fa-align-left me-1"></i>Lời giới thiệu</div>
+        <div class="small text-muted" style="max-height: 68px; overflow: hidden; font-size: 0.78rem;">
+          <%= truncate(strip_tags(content.content), length: 100) %>
+        </div>
+      </div>
+    <% when 'VideoUrl' %>
+      <% if (thumb = youtube_thumbnail_url(content.url)) %>
+        <img src="<%= thumb %>" class="card-img-top" style="aspect-ratio: 16/9; object-fit: cover;" alt="Thumbnail video" loading="lazy">
+      <% else %>
+        <div class="card-body p-2">
+          <div class="small text-muted text-break"><i class="fas fa-film text-danger me-1"></i><%= truncate(content.url, length: 50) %></div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <div class="card-footer p-1 bg-white d-flex gap-1">
+      <button type="button"
+              class="btn btn-sm btn-primary flex-grow-1 py-1"
+              style="font-size: 0.72rem;"
+              title="Đưa lên hiển thị trên website"
+              data-action="content-order#add">
+        <i class="fas fa-plus me-1"></i>Hiện lên Web
+      </button>
+      <% if type == 'ProjectImage' %>
+        <button type="button"
+                class="btn btn-sm btn-warning text-dark py-1 px-2"
+                style="font-size: 0.72rem;"
+                title="Đặt tấm ảnh này làm Ảnh Bìa Chính"
+                data-action="content-order#promoteToTop">
+          <i class="fas fa-star"></i> Bìa
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

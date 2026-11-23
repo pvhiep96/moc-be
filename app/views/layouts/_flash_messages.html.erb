@@ -1,0 +1,27 @@
+<% if notice %>
+  <div class="alert alert-success alert-dismissible fade show">
+    <i class="fas fa-check-circle me-1"></i> <%= notice %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% end %>
+
+<% if flash[:info] %>
+  <div class="alert alert-info alert-dismissible fade show">
+    <i class="fas fa-circle-info me-1"></i> <%= flash[:info] %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% end %>
+
+<% if flash[:warning] %>
+  <div class="alert alert-warning alert-dismissible fade show">
+    <i class="fas fa-triangle-exclamation me-1"></i> <%= flash[:warning] %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% end %>
+
+<% if alert %>
+  <div class="alert alert-danger alert-dismissible fade show">
+    <i class="fas fa-exclamation-circle me-1"></i> <%= alert %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% end %>

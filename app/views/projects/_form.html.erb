@@ -1,130 +1,645 @@
-<%= form_with(model: project, local: true) do |form| %>
-  <% if project.errors.any? %>
-    <div class="alert alert-danger shadow-sm border-0">
-      <h4><i class="fas fa-exclamation-triangle me-2"></i><%= pluralize(project.errors.count, "error") %> prevented this project from being saved:</h4>
-      <ul>
-        <% project.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+<style>
+  .detail-demo-browser {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #cbd5e1;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  }
 
-  <div class="card mb-4 shadow-sm border-0">
-    <div class="card-header bg-primary text-white" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;">
-      <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Project Information</h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <%= form.label :name, "Project Name", class: "form-label fw-bold" %>
-            <div class="input-group shadow-sm">
-              <%= form.text_field :name, class: 'form-control', placeholder: "Enter project name" %>
-            </div>
-            <small class="text-muted">Project name will be displayed on the homepage</small>
-          </div>
+  .detail-demo-topbar {
+    background: #0f172a;
+    color: #fff;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .detail-demo-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 16px;
+    background: #f8fafc;
+    align-items: stretch;
+  }
+
+  .detail-demo-block {
+    min-width: 235px;
+    flex: 1;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .detail-demo-block:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.14);
+  }
+
+  .detail-demo-block.is-selected {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  }
+
+  .detail-section-card {
+    transition: all 0.25s ease;
+  }
+
+  .detail-section-card.is-highlighted {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.28) !important;
+  }
+</style>
+
+<%= form_with(model: project, local: true, id: "project-studio-form") do |form| %>
+  <% displayed_imgs = project.persisted? ? project.displayed_images : [] %>
+  <% current_cover = displayed_imgs.first || (project.persisted? ? project.project_images.first : nil) %>
+  <% current_hover = displayed_imgs.second || current_cover %>
+  <% all_projs = defined?(@all_projects) && @all_projects.present? ? @all_projects : Project.order(id: :desc) %>
+
+  <div <% if project.persisted? %>
+         data-controller="content-order"
+         data-content-order-url-value="<%= update_content_positions_project_path(project) %>"
+       <% end %>>
+
+    <% if project.persisted? %>
+      <input type="hidden" name="content_order_json" value="" data-content-order-target="hiddenInput">
+    <% end %>
+
+    <!-- Thanh công cụ cố định trên cùng -->
+    <div class="sticky-workspace-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="badge bg-success fw-bold px-2 py-1">TRANG 3 / 3</span>
+          <h4 class="fw-bold mb-0" data-preview-project-name>
+            📖 Quản Lý Trang CHI TIẾT PROJECT: <%= project.persisted? ? project.name : "Tạo dự án mới" %>
+          </h4>
+          <% if project.persisted? %>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+              <i class="fas fa-check-circle me-1"></i>Đang hiển thị <%= project.displayed_images.size %> ảnh & <%= project.video_urls.size %> phim
+            </span>
+          <% end %>
         </div>
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <%= form.label :drive_id, "Google Drive ID", class: "form-label fw-bold" %>
-            <div class="input-group shadow-sm">
-              <span class="input-group-text bg-light border-end-0"><i class="fab fa-google-drive text-danger"></i></span>
-              <%= form.text_field :drive_id, class: 'form-control border-start-0', placeholder: "Enter Google Drive folder ID", style: "padding-left: 0;" %>
+        <div class="text-muted small mt-1">
+          Bấm vào <strong>từng Section trên Bản Đồ Demo bên dưới</strong> để nhảy tới đúng mục cần sửa (Tên & Google Drive, Bài Viết Mô Tả, Phim Cưới YouTube, hoặc Thứ Tự Album Ảnh).
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <% if project.persisted? %>
+          <a href="<%= frontend_url("/projects/#{project.id}") %>" target="_blank" rel="noopener"
+             class="btn btn-sm btn-dark fw-semibold">
+            <i class="fas fa-external-link-alt me-1 text-success"></i>Mở Trang Chi Tiết thật (/projects/<%= project.id %>) ↗
+          </a>
+          <%= link_to studio_manager_projects_path(project_id: project.id), class: "btn btn-sm btn-outline-primary fw-semibold" do %>
+            <i class="fas fa-images me-1"></i>Đổi Ảnh Bìa / Hover trên Studio
+          <% end %>
+        <% end %>
+
+        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+          <i class="fas fa-save me-2"></i><%= project.new_record? ? "Tạo dự án & Tải ảnh từ Drive" : "Lưu toàn bộ thay đổi" %>
+        </button>
+      </div>
+    </div>
+
+    <!-- Thanh chuyển đổi nhanh giữa các dự án -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="small fw-bold text-secondary me-1">
+            <i class="fas fa-folder-open me-1"></i>Chọn dự án cần sửa Trang Chi Tiết:
+          </span>
+          <% all_projs.each do |p| %>
+            <% is_curr = (project.persisted? && project.id == p.id) %>
+            <%= link_to edit_project_path(p),
+                class: "btn btn-sm #{is_curr ? 'btn-success fw-bold shadow-sm' : 'btn-outline-secondary'}" do %>
+              <%= p.name %>
+            <% end %>
+          <% end %>
+        </div>
+        <%= link_to new_project_path, class: "btn btn-sm #{project.new_record? ? 'btn-primary fw-bold' : 'btn-outline-primary'}" do %>
+          <i class="fas fa-plus-circle me-1"></i>+ Tạo Dự Án Mới
+        <% end %>
+      </div>
+    </div>
+
+    <% if project.errors.any? %>
+      <div class="alert alert-danger shadow-sm border-0 mb-4">
+        <h6 class="alert-heading fw-bold mb-2">
+          <i class="fas fa-exclamation-triangle me-2"></i>Chưa lưu được — vui lòng kiểm tra lại:
+        </h6>
+        <ul class="mb-0 small">
+          <% project.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% if project.persisted? %>
+      <!-- =========================================================================
+           BẢN ĐỒ DEMO MÔ TẢ VỊ TRÍ 4 SECTION TRÊN TRANG CHI TIẾT (/projects/:id)
+           ========================================================================= -->
+      <div class="detail-demo-browser mb-4">
+        <div class="detail-demo-topbar">
+          <div class="d-flex gap-1">
+            <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#ef4444;"></span>
+            <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#f59e0b;"></span>
+            <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#22c55e;"></span>
+          </div>
+          <div class="small text-white-50">
+            http://localhost:3000/projects/<%= project.id %> — <strong>BẢN ĐỒ DEMO DẢI CUỘN NGANG TRANG CHI TIẾT (BẤM VÀO SECTION ĐỂ SỬA)</strong>
+          </div>
+          <span class="badge bg-success">DEMO TRANG CHI TIẾT</span>
+        </div>
+
+        <!-- Header mô phỏng của trang /projects/:id -->
+        <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center bg-white small">
+          <span class="text-muted">← BACK TO PROJECTS</span>
+          <strong class="text-dark">M.O.C LOGO</strong>
+          <span class="text-muted">VIEW DETAIL →</span>
+        </div>
+
+        <!-- Dải cuộn ngang 4 Section của trang /projects/:id -->
+        <div class="detail-demo-strip">
+          <!-- DEMO SECTION 1: TÊN CẶP ĐÔI MỞ ĐẦU & GOOGLE DRIVE -->
+          <div class="detail-demo-block is-selected" id="demo-detail-sec-1" onclick="focusDetailSection('sec-1')">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-primary">SECTION 1: MỞ ĐẦU</span>
+                <span class="small text-primary fw-bold">Bấm để sửa ↓</span>
+              </div>
+              <div class="p-3 rounded bg-light border text-center my-2" style="min-height: 92px; display:flex; align-items:center; justify-content:center;">
+                <div class="fw-bold text-uppercase text-dark" style="font-size: 16px; letter-spacing: 0.04em;" data-preview-project-name>
+                  <%= project.name %>
+                </div>
+              </div>
             </div>
-            <small class="text-muted">Drive folder ID used to automatically fetch images</small>
+            <div class="small text-muted">
+              📍 Chữ tên cặp đôi cỡ lớn mở đầu trang chi tiết + Nguồn thư mục Google Drive.
+            </div>
+          </div>
+
+          <!-- DEMO SECTION 2: BÀI VIẾT LỜI TỰA / CREDIT -->
+          <div class="detail-demo-block" id="demo-detail-sec-2" onclick="focusDetailSection('sec-2')">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-success">SECTION 2: BÀI VIẾT MÔ TẢ</span>
+                <span class="small text-success fw-bold">Bấm để sửa ↓</span>
+              </div>
+              <div class="p-2 rounded bg-light border my-2 small text-dark" style="min-height: 92px; max-height: 92px; overflow: hidden; font-size: 11px;">
+                <% first_desc = project.descriptions.first&.content.to_s.gsub(/<[^>]*>/, ' ').strip %>
+                <% if first_desc.present? %>
+                  <%= truncate(first_desc, length: 140) %>
+                <% else %>
+                  <span class="text-muted fst-italic">Chưa có bài viết mô tả / credit...</span>
+                <% end %>
+              </div>
+            </div>
+            <div class="small text-muted">
+              📍 Khối lời tựa câu chuyện cưới / thông tin Ekip thực hiện (<%= project.descriptions.size %> đoạn).
+            </div>
+          </div>
+
+          <!-- DEMO SECTION 3: KHUNG XEM PHIM CƯỚI YOUTUBE / DRIVE -->
+          <div class="detail-demo-block" id="demo-detail-sec-3" onclick="focusDetailSection('sec-3')">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-danger">SECTION 3: VIDEO PHIM CƯỚI</span>
+                <span class="small text-danger fw-bold">Bấm để sửa ↓</span>
+              </div>
+              <div class="rounded bg-dark text-white d-flex flex-column align-items-center justify-content-center my-2" style="min-height: 92px;">
+                <i class="fas fa-circle-play fs-3 text-danger mb-1"></i>
+                <span style="font-size: 11px;"><%= project.video_urls.size %> Video Phim Cưới</span>
+              </div>
+            </div>
+            <div class="small text-muted">
+              📍 Khung phát video YouTube / Google Drive xem trực tiếp trên trang chi tiết.
+            </div>
+          </div>
+
+          <!-- DEMO SECTION 4: DẢI ALBUM ẢNH CƯỚI -->
+          <div class="detail-demo-block" id="demo-detail-sec-4" onclick="focusDetailSection('sec-4')">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-dark">SECTION 4: DẢI ALBUM ẢNH</span>
+                <span class="small text-dark fw-bold">Bấm để sắp xếp ↓</span>
+              </div>
+              <div class="d-flex gap-1 my-2" style="min-height: 92px; align-items: center;">
+                <% displayed_imgs.first(3).each_with_index do |img, idx| %>
+                  <div class="position-relative rounded overflow-hidden border flex-fill" style="height: 84px; background:#000;">
+                    <img src="<%= img.image_url %>" class="w-100 h-100" style="object-fit: cover;" alt="">
+                    <span class="position-absolute bottom-0 start-0 m-1 badge bg-dark bg-opacity-75" style="font-size: 9px;">#<%= idx + 1 %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="small text-muted">
+              📍 Dải <%= displayed_imgs.size %> ảnh cưới nối tiếp nhau (cuộn ngang trên PC, dọc trên Mobile).
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    <% end %>
 
-  <!-- Video Settings Card -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white py-3">
-      <h5 class="mb-0">Video Settings</h5>
-    </div>
-    <div class="card-body">
-      <!-- Horizontal Videos -->
-      <h6 class="mb-3">Horizontal Videos</h6>
-      <div data-controller="nested-form">
-        <template data-nested-form-target="template">
-          <%= form.fields_for :video_urls, VideoUrl.new, child_index: 'NEW_RECORD' do |video| %>
-            <%= render 'video_url_fields', f: video %>
-          <% end %>
-        </template>
+    <div class="row g-4">
+      <!-- =========================================================================
+           CỘT TRÁI: CHỈNH SỬA SECTION 1, SECTION 2, SECTION 3
+           ========================================================================= -->
+      <div class="<%= project.persisted? ? 'col-12 col-xl-5' : 'col-12 col-xl-8 mx-auto' %>">
 
-        <div data-nested-form-target="container">
-          <%= form.fields_for :video_urls do |video| %>
-            <%= render 'video_url_fields', f: video %>
-          <% end %>
+        <!-- SECTION 1: TÊN CẶP ĐÔI & KHO ẢNH GOOGLE DRIVE -->
+        <div class="card mb-4 border-primary border-opacity-25 detail-section-card" id="detail-card-sec-1">
+          <div class="card-header bg-primary bg-opacity-10">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+              <h6 class="mb-0 fw-bold">
+                <span class="badge bg-primary me-2">SECTION 1</span>Tên Cặp Đôi Mở Đầu & Thư Mục Google Drive
+              </h6>
+              <span class="badge bg-white text-primary border">
+                📍 Đầu Trang Chi Tiết
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <%= form.label :name, class: "form-label fw-semibold" do %>
+                Tên Cặp Đôi / Tên Dự Án <span class="text-danger">*</span>
+              <% end %>
+              <%= form.text_field :name,
+                  class: "form-control form-control-lg fw-semibold",
+                  placeholder: "Ví dụ: VU CAT TUONG + BI DO",
+                  data: { action: "input->content-order#updateNamePreview" } %>
+              <div class="form-text">
+                Hiển thị chữ IN HOA lớn ở vị trí mở đầu của Trang Chi Tiết (<code>/projects/<%= project.id || ':id' %></code>).
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <%= form.label :drive_id, "Link thư mục Google Drive chứa ảnh & video", class: "form-label fw-semibold" %>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="fab fa-google-drive text-danger"></i></span>
+                <%= form.text_field :drive_id,
+                    class: "form-control",
+                    placeholder: "Dán nguyên link https://drive.google.com/drive/folders/... vào đây",
+                    oninput: "const m = this.value.match(/\\/folders\\/([a-zA-Z0-9_-]+)/) || this.value.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (m && m[1]) { this.value = m[1]; }" %>
+              </div>
+              <div class="form-text mt-1">
+                <i class="fas fa-check-circle text-success me-1"></i>
+                Dán nguyên đường link thư mục Google Drive — hệ thống tự động tải toàn bộ ảnh, video và bài viết <code>.docx</code>!
+              </div>
+            </div>
+
+            <%= form.hidden_field :auto_display_new_content, value: true %>
+          </div>
         </div>
 
-        <div class="text-center mt-3 mb-4">
-          <button type="button" 
-                  data-action="nested-form#add" 
-                  class="btn btn-outline-primary">
-            <i class="fas fa-plus me-1"></i>Add Horizontal Video
+        <!-- SECTION 2: LỜI GIỚI THIỆU / CREDIT EKIP -->
+        <div class="card mb-4 border-success border-opacity-25 detail-section-card" id="detail-card-sec-2">
+          <div class="card-header bg-success bg-opacity-10">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+              <h6 class="mb-0 fw-bold">
+                <span class="badge bg-success me-2">SECTION 2</span>Bài Viết Mô Tả / Credit Ekip Thực Hiện
+              </h6>
+              <span class="badge bg-white text-success border">
+                📍 Hiện cạnh Tên Dự Án
+              </span>
+            </div>
+          </div>
+          <div class="card-body" data-controller="nested-form">
+            <p class="text-muted small mb-3">
+              Lời tựa câu chuyện tình yêu hoặc danh sách Ekip (Photographer, Videographer, Planner, Venue...) hiển thị trên trang chi tiết.
+            </p>
+
+            <template data-nested-form-target="template">
+              <%= form.fields_for :descriptions, Description.new, child_index: 'NEW_RECORD' do |description| %>
+                <%= render 'description_fields', f: description %>
+              <% end %>
+            </template>
+
+            <div data-nested-form-target="container">
+              <%= form.fields_for :descriptions do |description| %>
+                <%= render 'description_fields', f: description %>
+              <% end %>
+            </div>
+
+            <button type="button"
+                    data-action="nested-form#add"
+                    class="btn btn-outline-success btn-sm w-100 py-2 mt-1 fw-semibold">
+              <i class="fas fa-plus me-1"></i>+ Thêm đoạn Bài Viết Mô Tả / Credit
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 3: PHIM CƯỚI (YOUTUBE / GOOGLE DRIVE) -->
+        <div class="card mb-4 border-danger border-opacity-25 detail-section-card" id="detail-card-sec-3">
+          <div class="card-header bg-danger bg-opacity-10">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+              <h6 class="mb-0 fw-bold">
+                <span class="badge bg-danger me-2">SECTION 3</span>Video Phim Cưới (YouTube / Google Drive)
+              </h6>
+              <span class="badge bg-white text-danger border">
+                📍 Khung phát Phim Cưới 16:9
+              </span>
+            </div>
+          </div>
+          <div class="card-body" data-controller="nested-form">
+            <div class="alert alert-light border small py-2 px-3 mb-3">
+              <i class="fas fa-film text-danger me-1"></i>
+              Dán link <strong>YouTube</strong> (<code>https://www.youtube.com/watch?v=...</code>) hoặc link <strong>Google Drive Video</strong>. Khách có thể bấm Play xem phim ngay trên trang chi tiết!
+            </div>
+
+            <template data-nested-form-target="template">
+              <%= form.fields_for :video_urls, VideoUrl.new, child_index: 'NEW_RECORD' do |video| %>
+                <%= render 'video_url_fields', f: video %>
+              <% end %>
+            </template>
+
+            <div data-nested-form-target="container">
+              <%= form.fields_for :video_urls do |video| %>
+                <%= render 'video_url_fields', f: video %>
+              <% end %>
+            </div>
+
+            <button type="button"
+                    data-action="nested-form#add"
+                    class="btn btn-outline-danger btn-sm w-100 py-2 mt-1 fw-semibold">
+              <i class="fas fa-plus me-1"></i>+ Thêm link Video Phim Cưới
+            </button>
+          </div>
+        </div>
+
+        <!-- TÙY CHỌN THÊM: VIDEO DỌC 9:16 -->
+        <div class="card mb-4" data-controller="reveal">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h6 class="mb-0 fw-bold">
+                <span class="badge bg-secondary me-2">Tùy chọn</span>Video Dọc Ngắn 9:16 (Khi di chuột ở Studio & Home)
+              </h6>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <%= form.check_box :show_video,
+                  class: "form-check-input",
+                  data: { reveal_target: "checkbox", action: "change->reveal#toggle" } %>
+              <%= form.label :show_video, "Bật sử dụng", class: "form-check-label fw-semibold small" %>
+            </div>
+          </div>
+          <div class="card-body" data-reveal-target="content">
+            <%= form.fields_for :video_vertical do |video| %>
+              <%= render 'video_vertical_fields', f: video %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="d-grid mb-4">
+          <button type="submit" class="btn btn-primary btn-lg fw-semibold shadow-sm">
+            <i class="fas fa-save me-2"></i><%= project.new_record? ? "Tạo dự án & Tải ảnh từ Drive" : "Lưu toàn bộ thay đổi Trang Chi Tiết" %>
           </button>
         </div>
       </div>
 
-      <!-- Thumbnail Video -->
-      <h6 class="mb-3">Thumbnail Video</h6>
-      <div class="mb-3">
-        <div class="form-check form-switch">
-          <%= form.check_box :show_video, 
-              class: "form-check-input", 
-              data: { 
-                controller: "video-validation",
-                action: "change->video-validation#validateVideo"
-              } %>
-          <%= form.label :show_video, "Enable Video Vertical Display", class: "form-check-label" %>
-        </div>
-      </div>
+      <!-- =========================================================================
+           CỘT PHẢI: SECTION 4 — SẮP XẾP DẢI ALBUM ẢNH & BỐ CỤC TRANG CHI TIẾT
+           ========================================================================= -->
+      <% if project.persisted? %>
+        <div class="col-12 col-xl-7" id="content-studio">
+          <div class="card mb-4 border-dark border-opacity-25 shadow-sm detail-section-card" id="detail-card-sec-4">
+            <div class="card-header bg-dark text-white">
+              <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                <div>
+                  <h5 class="mb-1 fw-bold">
+                    <span class="badge bg-warning text-dark me-2">SECTION 4</span>Thứ Tự Hiển Thị Trên Trang Chi Tiết (/projects/<%= project.id %>)
+                    <span class="badge rounded-pill bg-primary ms-1" data-content-order-target="displayedTotal">
+                      <%= @content_items&.size || 0 %> mục
+                    </span>
+                  </h5>
+                  <div class="small text-white-50">
+                    • Kéo thả các ô bên dưới để đổi thứ tự xuất hiện từ trái sang phải trên Trang Chi Tiết (tự động lưu ngay lập tức).<br>
+                    • Hoặc bấm nút màu xanh <strong>"⚡ Xếp chuẩn: Mô tả → Video → Ảnh"</strong> để hệ thống tự xếp bố cục đẹp nhất!
+                  </div>
+                </div>
+                <div data-content-order-target="status"></div>
+              </div>
 
-      <%= form.fields_for :video_vertical do |video| %>
-        <%= render 'video_vertical_fields', f: video %>
+              <!-- Thanh công cụ lọc nhanh -->
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top border-secondary">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-light active" data-filter-type="ALL" data-action="content-order#filterSorted">
+                    Tất cả (<%= @content_items&.size || 0 %>)
+                  </button>
+                  <button type="button" class="btn btn-outline-light" data-filter-type="ProjectImage" data-action="content-order#filterSorted">
+                    <i class="fas fa-image me-1 text-info"></i>Ảnh
+                  </button>
+                  <button type="button" class="btn btn-outline-light" data-filter-type="VideoUrl" data-action="content-order#filterSorted">
+                    <i class="fas fa-film me-1 text-danger"></i>Video
+                  </button>
+                  <button type="button" class="btn btn-outline-light" data-filter-type="Description" data-action="content-order#filterSorted">
+                    <i class="fas fa-align-left me-1 text-success"></i>Mô tả
+                  </button>
+                </div>
+
+                <div class="d-flex gap-1 flex-wrap">
+                  <button type="button" class="btn btn-sm btn-success fw-semibold" data-action="content-order#autoSortStandard">
+                    <i class="fas fa-wand-magic-sparkles me-1"></i>⚡ Xếp chuẩn: Mô tả → Video → Ảnh
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-warning" data-action="content-order#addAll">
+                    <i class="fas fa-eye me-1"></i>Hiện tất cả
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body" style="max-height: 760px; overflow-y: auto;">
+              <div id="sortable-content" class="row g-2" data-content-order-target="sorted">
+                <% Array(@content_items).each_with_index do |item, index| %>
+                  <%= render 'content_order_item', content: item[:content], type: item[:type], position: index + 1 %>
+                <% end %>
+              </div>
+
+              <div class="alert alert-warning mb-0 <%= 'd-none' if @content_items.present? %>"
+                   data-content-order-target="sortedEmpty">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <i class="fas fa-triangle-exclamation me-2"></i>
+                    <strong>Chưa có nội dung nào đang hiển thị!</strong> Bấm nút bên phải để hiển thị toàn bộ ảnh và video.
+                  </div>
+                  <button type="button" class="btn btn-sm btn-warning fw-semibold" data-action="content-order#addAll">
+                    <i class="fas fa-bolt me-1"></i>Hiển thị tất cả ngay
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mục đã ẩn -->
+          <% hidden_count = (@unordered_images&.size || 0) + (@unordered_videos&.size || 0) + (@unordered_descriptions&.size || 0) %>
+          <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h6 class="mb-0 fw-semibold text-secondary">
+                  <i class="fas fa-eye-slash me-2"></i>Các mục đang tạm ẩn khỏi Trang Chi Tiết
+                  <span class="badge rounded-pill bg-secondary ms-1" data-content-order-target="poolTotal">
+                    <%= hidden_count %>
+                  </span>
+                </h6>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-action="content-order#addAll">
+                <i class="fas fa-plus me-1"></i>Đưa tất cả lên hiển thị
+              </button>
+            </div>
+
+            <div class="card-body">
+              <ul class="nav nav-pills nav-fill mb-3 bg-light p-1 rounded" id="unorderedContentTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active py-1 small fw-semibold" id="pool-images-tab" data-bs-toggle="tab" data-bs-target="#pool-images" type="button" role="tab">
+                    Ảnh đang ẩn (<span data-tab-count="ProjectImage"><%= @unordered_images&.count || 0 %></span>)
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link py-1 small fw-semibold" id="pool-videos-tab" data-bs-toggle="tab" data-bs-target="#pool-videos" type="button" role="tab">
+                    Video đang ẩn (<span data-tab-count="VideoUrl"><%= @unordered_videos&.count || 0 %></span>)
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link py-1 small fw-semibold" id="pool-descriptions-tab" data-bs-toggle="tab" data-bs-target="#pool-descriptions" type="button" role="tab">
+                    Mô tả đang ẩn (<span data-tab-count="Description"><%= @unordered_descriptions&.count || 0 %></span>)
+                  </button>
+                </li>
+              </ul>
+
+              <div class="tab-content" style="max-height: 300px; overflow-y: auto;">
+                <div class="tab-pane fade show active" id="pool-images" role="tabpanel">
+                  <div class="row g-2" data-unsorted-container="ProjectImage">
+                    <% Array(@unordered_images).each do |image| %>
+                      <%= render 'content_pool_item', content: image, type: 'ProjectImage' %>
+                    <% end %>
+                  </div>
+                  <div class="alert alert-light border text-center mb-0 <%= 'd-none' if @unordered_images.present? %>"
+                       data-unsorted-empty="ProjectImage">
+                    <i class="fas fa-check-circle me-1 text-success"></i>Toàn bộ ảnh của dự án đều đang được hiển thị trên website.
+                  </div>
+                </div>
+
+                <div class="tab-pane fade" id="pool-videos" role="tabpanel">
+                  <div class="row g-2" data-unsorted-container="VideoUrl">
+                    <% Array(@unordered_videos).each do |video| %>
+                      <%= render 'content_pool_item', content: video, type: 'VideoUrl' %>
+                    <% end %>
+                  </div>
+                  <div class="alert alert-light border text-center mb-0 <%= 'd-none' if @unordered_videos.present? %>"
+                       data-unsorted-empty="VideoUrl">
+                    <i class="fas fa-check-circle me-1 text-success"></i>Tất cả video đều đang được hiển thị trên website.
+                  </div>
+                </div>
+
+                <div class="tab-pane fade" id="pool-descriptions" role="tabpanel">
+                  <div class="row g-2" data-unsorted-container="Description">
+                    <% Array(@unordered_descriptions).each do |description| %>
+                      <%= render 'content_pool_item', content: description, type: 'Description' %>
+                    <% end %>
+                  </div>
+                  <div class="alert alert-light border text-center mb-0 <%= 'd-none' if @unordered_descriptions.present? %>"
+                       data-unsorted-empty="Description">
+                    <i class="fas fa-check-circle me-1 text-success"></i>Tất cả lời giới thiệu đều đang được hiển thị trên website.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kho DOM ẩn để chuyển đổi tức thì không cần reload -->
+          <div class="d-none" data-content-order-target="sortedPool">
+            <% Array(@unordered_images).each do |image| %>
+              <%= render 'content_order_item', content: image, type: 'ProjectImage', position: nil %>
+            <% end %>
+            <% Array(@unordered_descriptions).each do |description| %>
+              <%= render 'content_order_item', content: description, type: 'Description', position: nil %>
+            <% end %>
+            <% Array(@unordered_videos).each do |video| %>
+              <%= render 'content_order_item', content: video, type: 'VideoUrl', position: nil %>
+            <% end %>
+          </div>
+
+          <div class="d-none" data-content-order-target="unsortedPool">
+            <% Array(@content_items).each do |item| %>
+              <%= render 'content_pool_item', content: item[:content], type: item[:type] %>
+            <% end %>
+          </div>
+        </div>
       <% end %>
     </div>
   </div>
+<% end %>
 
-  <!-- Descriptions Card -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white py-3">
-      <h5 class="mb-0">Descriptions</h5>
-    </div>
-    <div class="card-body">
-      <div data-controller="nested-form">
-        <template data-nested-form-target="template">
-          <%= form.fields_for :descriptions, Description.new, child_index: 'NEW_RECORD' do |description| %>
-            <%= render 'description_fields', f: description %>
-          <% end %>
-        </template>
+<% if project.persisted? && project.drive_id.present? %>
+  <div class="card mt-3 border-info border-opacity-25">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3 py-3">
+      <div>
+        <h6 class="mb-1 fw-bold"><i class="fab fa-google-drive text-danger me-2"></i>Cập nhật ảnh mới từ thư mục Google Drive</h6>
+        <div class="small text-muted">
+          Nếu bạn vừa tải thêm hoặc xóa bớt ảnh trên Google Drive (ID: <code><%= project.drive_id %></code>), bấm nút bên phải để lấy danh sách mới nhất.
+        </div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <%= button_to reload_images_project_path(project),
+            method: :post,
+            class: "btn btn-outline-primary btn-sm fw-semibold" do %>
+          <i class="fas fa-sync-alt me-1"></i>Quét & Tải thêm ảnh mới từ Drive
+        <% end %>
 
-        <div data-nested-form-target="container">
-          <%= form.fields_for :descriptions do |description| %>
-            <%= render 'description_fields', f: description %>
-          <% end %>
-        </div>
-        
-        <div class="text-center mt-3">
-          <button type="button" 
-                  data-action="nested-form#add" 
-                  class="btn btn-outline-primary">
-            <i class="fas fa-plus me-1"></i>Add Description
-          </button>
-        </div>
+        <%= button_to reload_images_project_path(project, prune_removed: '1'),
+            method: :post,
+            class: "btn btn-outline-secondary btn-sm" do %>
+          <i class="fas fa-broom me-1"></i>Đồng bộ & Dọn ảnh đã xóa trên Drive
+        <% end %>
       </div>
     </div>
   </div>
+<% end %>
 
-  <div class="d-flex justify-content-between align-items-center mt-4">
-    <%= link_to projects_path, class: 'btn btn-secondary shadow-sm' do %>
-      <i class="fas fa-arrow-left me-1"></i> Back
-    <% end %>
-    <button type="submit" class="btn btn-primary shadow-sm" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0); border: none;">
-      <i class="fas fa-save me-1"></i> <%= project.new_record? ? "Create Project" : "Update Project" %>
-    </button>
-  </div>
-<% end %> 
+<script>
+  function focusDetailSection(secKey) {
+    document.querySelectorAll('.detail-demo-block').forEach((el) => {
+      el.classList.toggle('is-selected', el.id === 'demo-detail-' + secKey);
+    });
+
+    document.querySelectorAll('.detail-section-card').forEach((card) => {
+      card.classList.remove('is-highlighted');
+    });
+
+    const targetCard = document.getElementById('detail-card-' + secKey);
+    if (targetCard) {
+      targetCard.classList.add('is-highlighted');
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+</script>
+
+<style>
+  .drag-handle {
+    cursor: grab;
+  }
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+  .sortable-ghost {
+    opacity: 0.35;
+    background-color: #dbeafe !important;
+  }
+  .studio-order-card {
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.2s ease;
+  }
+  .studio-order-card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12) !important;
+  }
+</style>

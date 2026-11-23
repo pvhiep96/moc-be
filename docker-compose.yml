@@ -15,8 +15,8 @@ services:
     stdin_open: true
     tty: true
     build:
-      context: ./docker
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: docker/Dockerfile.dev
     command: sh /docker-entrypoint.sh
     ports:
       - "${APP_PORT}:${APP_PORT}"

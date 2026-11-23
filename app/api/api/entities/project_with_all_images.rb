@@ -9,18 +9,16 @@ module Api
 
       # Vẫn giữ lại ảnh đã được chọn hiển thị
       expose :cover_image do |project, _options|
-        project.displayed_images.first&.image_url if project.displayed_images.present?
+        project.displayed_images.first&.image_url
       end
 
       expose :hover_image do |project, _options|
-        if project.displayed_images.present? && project.displayed_images.count > 1
-          project.displayed_images.second&.image_url
-        end
+        project.displayed_images.second&.image_url
       end
 
       # Thêm danh sách nội dung đã được sắp xếp theo thứ tự hiển thị
       expose :ordered_content do |project, _options|
-        ordered_items = project.content_positions.includes(:positionable).order(:position)
+        ordered_items = project.sorted_content_positions
 
         ordered_items.map do |position|
           item = position.positionable
@@ -64,7 +62,7 @@ module Api
       end
 
       expose :images_count do |project, _options|
-        project.displayed_images.count
+        project.displayed_images.size
       end
 
       # Thêm tất cả các ảnh của dự án
@@ -73,7 +71,7 @@ module Api
       end
 
       expose :all_images_count do |project, _options|
-        project.project_images.count
+        project.project_images.size
       end
 
       # Danh sách các nội dung chưa được sắp xếp

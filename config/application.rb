@@ -22,5 +22,12 @@ module Moc2025Be
     # Ensure services directory is autoloaded
     config.autoload_paths += %W(#{config.root}/app/services)
     config.eager_load_paths += %W(#{config.root}/app/services)
+
+    # Nén gzip response JSON của API (nginx mặc định chỉ gzip text/html).
+    # Không nén video/ảnh (đã nén sẵn, nén lại chỉ tốn CPU).
+    config.middleware.use Rack::Deflater,
+                          if: lambda { |_env, _status, headers, _body|
+                            headers['Content-Type'].to_s.include?('json')
+                          }
   end
 end

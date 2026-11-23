@@ -96,8 +96,8 @@ export default class extends Controller {
             },
             table_responsive_width: true,
 
-            height: 500,
-            min_height: 300,
+            height: 320,
+            min_height: 240,
             max_height: 800,
             autoresize_bottom_margin: 50,
             statusbar: true,

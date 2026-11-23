@@ -1,0 +1,101 @@
+<%# Thẻ nội dung ở danh sách "Đang hiển thị trên Website". locals: content, type, position %>
+<div class="content-item col-6 col-md-4 col-xxl-3"
+     data-content-key="<%= type %>-<%= content.id %>"
+     data-id="<%= content.id %>"
+     data-type="<%= type %>">
+  <div class="card h-100 border shadow-none studio-order-card">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center py-1 px-2 border-bottom">
+      <div class="d-flex align-items-center flex-wrap gap-1">
+        <span class="drag-handle text-secondary px-1" title="Giữ chuột kéo để đổi vị trí">
+          <i class="fas fa-grip-vertical"></i>
+        </span>
+        <span class="badge bg-dark" data-position-badge>#<%= position %></span>
+        <span class="d-none" data-role-badge style="font-size: 0.68rem;"></span>
+      </div>
+
+      <div class="d-flex align-items-center gap-1">
+        <% if type != 'ProjectImage' %>
+          <button type="button"
+                  class="btn btn-sm btn-light border py-0 px-1 text-primary"
+                  title="Đưa mục này lên đầu trang chi tiết"
+                  data-action="content-order#promoteToTop">
+            <i class="fas fa-arrow-up" style="font-size: 0.7rem;"></i> Lên đầu
+          </button>
+        <% end %>
+        <button type="button"
+                class="btn btn-sm btn-light border py-0 px-1 text-secondary"
+                title="Ẩn khỏi website (không xóa ảnh gốc)"
+                data-action="content-order#remove">
+          <i class="fas fa-eye-slash" style="font-size: 0.7rem;"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body p-2 d-flex flex-column justify-content-between">
+      <% case type %>
+      <% when 'ProjectImage' %>
+        <div class="position-relative rounded overflow-hidden bg-dark" style="aspect-ratio: 4/3;">
+          <img src="<%= content.image_url %>"
+               class="w-100 h-100 drag-handle"
+               style="object-fit: contain;"
+               alt="Ảnh dự án"
+               loading="lazy">
+          <a href="<%= content.image_url %>" target="_blank" rel="noopener"
+             class="position-absolute bottom-0 end-0 m-1 badge bg-dark bg-opacity-75 text-white text-decoration-none"
+             title="Xem ảnh kích thước lớn">
+            <i class="fas fa-expand"></i>
+          </a>
+        </div>
+        <div class="d-flex gap-1 mt-2">
+          <button type="button"
+                  data-btn-cover
+                  data-action="content-order#promoteToTop"
+                  class="btn btn-sm btn-outline-warning text-dark flex-grow-1 py-1"
+                  style="font-size: 0.72rem;"
+                  title="Chọn tấm ảnh này làm Ảnh Bìa Chính trên Trang Chủ & Trang Studio">
+            <i class="fas fa-star me-1"></i>Đặt Bìa
+          </button>
+          <button type="button"
+                  data-btn-hover
+                  data-action="content-order#promoteToHover"
+                  class="btn btn-sm btn-outline-info text-dark flex-grow-1 py-1"
+                  style="font-size: 0.72rem;"
+                  title="Chọn tấm ảnh này làm Ảnh Hover (hiện ra khi khách di chuột vào dự án)">
+            ✦ Đặt Hover
+          </button>
+        </div>
+      <% when 'Description' %>
+        <div class="p-2 bg-success-subtle bg-opacity-25 rounded border border-success-subtle h-100">
+          <div class="small fw-bold text-success mb-1">
+            <i class="fas fa-align-left me-1"></i>Lời giới thiệu / Credit
+          </div>
+          <div class="badge bg-white text-secondary border mb-1" style="font-size: 0.65rem;">
+            Hiện ở: Trang Chi Tiết Dự Án
+          </div>
+          <div class="small text-muted" style="max-height: 80px; overflow-y: auto; font-size: 0.76rem;">
+            <%= truncate(strip_tags(content.content), length: 120) %>
+          </div>
+        </div>
+      <% when 'VideoUrl' %>
+        <div>
+          <% if (thumb = youtube_thumbnail_url(content.url)) %>
+            <div class="position-relative rounded overflow-hidden bg-dark" style="aspect-ratio: 16/9;">
+              <img src="<%= thumb %>" class="w-100 h-100" style="object-fit: cover;" alt="Thumbnail video" loading="lazy">
+              <span class="position-absolute top-50 start-50 translate-middle badge rounded-pill bg-danger px-2 py-1">
+                <i class="fas fa-play me-1"></i>Phim Cưới
+              </span>
+            </div>
+          <% else %>
+            <div class="p-2 bg-danger-subtle rounded border border-danger-subtle small text-break">
+              <div class="fw-bold text-danger mb-1"><i class="fas fa-film me-1"></i>Phim Cưới (Livid / Drive)</div>
+              <%= truncate(content.url, length: 48) %>
+            </div>
+          <% end %>
+          <div class="small text-muted mt-1" style="font-size: 0.7rem;">
+            <i class="fas fa-location-dot text-danger me-1"></i>Hiện ở: Trang Chi Tiết Dự Án
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

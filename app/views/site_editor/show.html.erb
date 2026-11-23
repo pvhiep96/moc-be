@@ -1,0 +1,187 @@
+<%
+  labels = SiteContent.content_fields.to_h { |f| [f['key'], f['label']] }
+  page_meta = @pages.map { |p| { id: p['id'], name: p['name'], path: p['path'] } }
+  field_page = @pages.flat_map { |p| p['sections'].flat_map { |s| s['fields'].map { |f| [f['key'], p['id']] } } }.to_h
+%>
+<div class="se-app"
+     data-controller="site-editor"
+     data-site-editor-frontend-origin-value="<%= @frontend_origin %>"
+     data-site-editor-save-url-value="<%= update_site_editor_path %>"
+     data-site-editor-upload-url-value="<%= upload_site_editor_path %>"
+     data-site-editor-initial-page-value="<%= @active_page['id'] %>"
+     data-site-editor-edit-project-url-value="<%= edit_project_path(id: '__ID__') %>"
+     data-site-editor-media-project-url-value="<%= studio_manager_projects_path(project_id: '__ID__') %>">
+
+  <script type="application/json" data-site-editor-target="valuesJson"><%= raw json_escape(@values.to_json) %></script>
+  <script type="application/json" data-site-editor-target="defaultsJson"><%= raw json_escape(@defaults.to_json) %></script>
+  <script type="application/json" data-site-editor-target="labelsJson"><%= raw json_escape(labels.to_json) %></script>
+  <script type="application/json" data-site-editor-target="pagesJson"><%= raw json_escape(page_meta.to_json) %></script>
+  <script type="application/json" data-site-editor-target="fieldPageJson"><%= raw json_escape(field_page.to_json) %></script>
+  <script type="application/json" data-site-editor-target="projectsJson"><%= raw json_escape(@projects.map { |p| { id: p.id, name: p.name } }.to_json) %></script>
+
+  <!-- ================= THANH TRÊN CÙNG ================= -->
+  <header class="se-topbar">
+    <a class="se-brand" href="<%= projects_path %>" title="Về trang quản trị dự án">
+      <span class="se-brand-icon"><i class="fas fa-pen-ruler"></i></span>
+      <span><small>MOC Admin</small><strong>Sửa giao diện website</strong></span>
+    </a>
+
+    <nav class="se-tabs" aria-label="Chọn trang cần sửa">
+      <% @pages.each do |page| %>
+        <button type="button" class="se-tab" data-page-id="<%= page['id'] %>"
+                data-site-editor-target="tab" data-action="site-editor#selectTab">
+          <i class="fas <%= page['icon'] %>"></i> <%= page['name'] %><span class="se-dot" title="Có thay đổi chưa lưu"></span>
+        </button>
+      <% end %>
+    </nav>
+
+    <div class="se-actions">
+      <span class="se-status" data-site-editor-target="status">Chưa có thay đổi</span>
+      <button type="button" class="btn btn-sm btn-outline-light" data-site-editor-target="discardBtn"
+              data-action="site-editor#discard" disabled title="Bỏ mọi thay đổi chưa lưu">
+        <i class="fas fa-rotate-left"></i> Hoàn tác
+      </button>
+      <button type="button" class="btn btn-sm btn-warning fw-bold" data-site-editor-target="saveBtn"
+              data-action="site-editor#save" disabled title="Lưu & cập nhật website (Ctrl/⌘ + S)">
+        <i class="fas fa-cloud-arrow-up"></i> Lưu thay đổi
+      </button>
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-light" data-bs-toggle="dropdown" aria-label="Menu quản trị"><i class="fas fa-bars"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end shadow">
+          <li><%= link_to projects_path, class: 'dropdown-item' do %><i class="fas fa-film me-2"></i>Dự án (ảnh, video, mô tả)<% end %></li>
+          <li><%= link_to new_project_path, class: 'dropdown-item' do %><i class="fas fa-plus me-2"></i>Thêm dự án mới<% end %></li>
+          <li><%= link_to inquiries_path, class: 'dropdown-item' do %><i class="fas fa-inbox me-2"></i>Hộp thư khách hàng<% end %></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><%= button_to logout_path, method: :delete, class: 'dropdown-item text-danger' do %><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất<% end %></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="se-main">
+    <!-- ================= KHUNG XEM TRƯỚC (TRANG THẬT) ================= -->
+    <section class="se-preview">
+      <div class="se-preview-bar">
+        <div class="se-seg" role="group" aria-label="Kích thước màn hình">
+          <button type="button" class="is-active" data-site-editor-target="deviceBtn" data-device="desktop" data-action="site-editor#setDevice"><i class="fas fa-desktop"></i> Máy tính</button>
+          <button type="button" data-site-editor-target="deviceBtn" data-device="mobile" data-action="site-editor#setDevice"><i class="fas fa-mobile-screen"></i> Điện thoại</button>
+        </div>
+        <select class="form-select form-select-sm se-hidden" style="max-width: 240px" data-site-editor-target="projectSelect"
+                data-action="site-editor#changePreviewProject" aria-label="Chọn dự án để xem">
+          <% @projects.each do |p| %>
+            <option value="<%= p.id %>"><%= p.name %></option>
+          <% end %>
+        </select>
+        <div class="se-url" data-site-editor-target="url"></div>
+        <div class="form-check form-switch m-0" title="Tắt để bấm link / cuộn trang như khách bình thường">
+          <input class="form-check-input" type="checkbox" id="se-outline" checked data-site-editor-target="outlineToggle" data-action="site-editor#toggleOutline">
+          <label class="form-check-label small fw-semibold" for="se-outline">Chế độ chọn vùng</label>
+        </div>
+        <button type="button" class="btn btn-sm btn-light border" data-action="site-editor#reloadFrame" title="Tải lại khung xem trước"><i class="fas fa-rotate"></i></button>
+        <a class="btn btn-sm btn-light border" data-site-editor-target="openLink" target="_blank" rel="noopener" title="Mở trang thật trong tab mới"><i class="fas fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="se-stage" data-site-editor-target="stage">
+        <iframe class="se-frame" title="Xem trước website" data-site-editor-target="frame" data-action="load->site-editor#frameLoaded"></iframe>
+        <div class="se-stage-msg" data-site-editor-target="stageMsg">
+          <div>
+            <div class="fs-3 mb-2"><i class="fas fa-plug-circle-xmark"></i></div>
+            <div class="fw-bold text-dark mb-1">Không kết nối được khung xem trước</div>
+            <div>Không mở được website <code><%= @frontend_origin %></code> ở chế độ sửa.<br>
+              Hãy kiểm tra website (moc-fe) đang chạy, và biến <code>FRONTEND_URL</code> (backend) / <code>NEXT_PUBLIC_ADMIN_ORIGINS</code> (frontend) đã đúng.</div>
+            <div class="mt-2 small">Bạn vẫn có thể sửa ở cột bên phải và bấm Lưu.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CỘT Ô NHẬP ================= -->
+    <aside class="se-panel">
+      <div class="se-panel-head">
+        <h2><i class="fas fa-layer-group text-primary"></i> <span data-site-editor-target="pageTitle"></span></h2>
+        <p data-site-editor-target="pageSubtitle"></p>
+        <input type="search" class="form-control form-control-sm se-search" placeholder="Tìm ô nhập trên trang này… (vd: email, tiêu đề)"
+               data-site-editor-target="search" data-action="input->site-editor#filter">
+      </div>
+
+      <div class="se-panel-scroll" data-site-editor-target="panelScroll">
+        <div class="se-howto">
+          <strong><i class="fas fa-hand-pointer"></i> Cách sửa:</strong>
+          <ol>
+            <li>Di chuột lên trang bên trái — vùng có <b>viền xanh</b> là sửa được.</li>
+            <li><b>Click</b> vào vùng đó → ô nhập tương ứng hiện ra (tô vàng) ở cột này.</li>
+            <li>Gõ nội dung — trang bên trái <b>đổi ngay</b> để bạn xem trước.</li>
+            <li>Bấm <b>Lưu thay đổi</b> để đăng lên website thật.</li>
+          </ol>
+          Nút <i class="fas fa-crosshairs"></i> cạnh mỗi ô: chỉ vị trí của ô đó trên trang.
+        </div>
+
+        <div class="se-project-card se-hidden" data-site-editor-target="projectCard">
+          <div class="d-flex align-items-start gap-2">
+            <div class="flex-grow-1">
+              <div class="small text-muted fw-semibold">Bạn vừa chọn dự án</div>
+              <h3 data-site-editor-target="projectName"></h3>
+            </div>
+            <button type="button" class="btn-close" aria-label="Đóng" data-action="site-editor#closeProjectCard"></button>
+          </div>
+          <p class="small text-muted mb-2">Ảnh, video, mô tả của dự án mở ngay bên cạnh — sửa xong bấm <b>Đóng & xem kết quả</b>, khung xem trước tự tải lại.</p>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-primary" data-mode="edit" data-action="site-editor#openProjectEditor">
+              <i class="fas fa-images me-1"></i> Ảnh, video, mô tả & thứ tự hiển thị
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-mode="media" data-action="site-editor#openProjectEditor">
+              <i class="fas fa-star me-1"></i> Ảnh bìa / ảnh hover / video dọc (trang Gallery)
+            </button>
+          </div>
+        </div>
+
+        <% @pages.each do |page| %>
+          <div class="se-page se-hidden" data-site-editor-target="pagePanel" data-page-id="<%= page['id'] %>"
+               data-page-name="<%= page['name'] %>" data-page-path="<%= page['path'] %>">
+            <% if page['note'].present? %>
+              <div class="se-note"><i class="fas fa-circle-info me-1"></i><%= page['note'] %></div>
+            <% end %>
+            <% if page['sections'].empty? %>
+              <div class="text-muted small text-center py-4">Trang này không có chữ riêng để sửa.</div>
+            <% end %>
+            <% page['sections'].each_with_index do |section, idx| %>
+              <details class="se-section" data-section-id="<%= section['id'] %>" <%= 'open' if idx.zero? %>>
+                <summary>
+                  <i class="fas fa-chevron-right se-chevron"></i>
+                  <div>
+                    <div class="se-section-title"><%= section['name'] %></div>
+                    <div class="se-section-where"><%= section['where'] %></div>
+                  </div>
+                  <span class="se-section-count"><%= section['fields'].size %> ô</span>
+                </summary>
+                <div class="se-section-body">
+                  <% section['fields'].each do |field| %>
+                    <%= render 'field', field: field, page_id: page['id'] %>
+                  <% end %>
+                </div>
+              </details>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ================= NGĂN TRƯỢT: SỬA ẢNH / VIDEO CỦA DỰ ÁN ================= -->
+  <div class="se-drawer se-hidden" data-site-editor-target="drawer">
+    <div class="se-drawer-backdrop" data-action="click->site-editor#closeDrawer"></div>
+    <div class="se-drawer-panel" role="dialog" aria-modal="true">
+      <div class="se-drawer-head">
+        <i class="fas fa-film text-primary"></i>
+        <strong class="text-truncate" data-site-editor-target="drawerTitle"></strong>
+        <a class="btn btn-sm btn-light border ms-auto" target="_blank" rel="noopener" data-site-editor-target="drawerOpenTab" title="Mở trong tab mới">
+          <i class="fas fa-arrow-up-right-from-square"></i>
+        </a>
+        <button type="button" class="btn btn-sm btn-primary fw-semibold" data-action="site-editor#closeDrawer">
+          <i class="fas fa-check me-1"></i> Đóng & xem kết quả
+        </button>
+      </div>
+      <iframe class="se-drawer-frame" title="Sửa dự án" data-site-editor-target="drawerFrame"></iframe>
+    </div>
+  </div>
+</div>

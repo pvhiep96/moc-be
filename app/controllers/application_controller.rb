@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   def require_admin
     return if admin_logged_in?
 
-    flash[:alert] = 'You must be logged in to access this page'
+    flash[:alert] = 'Bạn cần đăng nhập để truy cập trang này.'
     redirect_to login_path
   end
 end

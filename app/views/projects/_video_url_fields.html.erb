@@ -1,35 +1,41 @@
-<div class="nested-fields card mb-3">
-  <div class="card-body">
-    <div class="form-group mb-3">
-      <%= f.label :url, "YouTube Video URL", class: "form-label fw-semibold" %>
-      <%= f.text_field :url,
-          class: "form-control",
-          placeholder: "Enter YouTube video URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)",
-          data: {
-            controller: "video-url",
-            action: "input->video-url#validateUrl"
-          } %>
-      <div class="mt-3" data-video-url-target="preview"></div>
-      <div class="form-text">Enter a valid YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)</div>
+<div class="nested-fields card mb-3 border">
+  <div class="card-body py-3" data-controller="video-url">
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div class="form-group flex-grow-1">
+        <%= f.label :url, "Link video YouTube", class: "form-label fw-semibold" %>
+        <%= f.text_field :url,
+            class: "form-control",
+            placeholder: "https://www.youtube.com/watch?v=...",
+            data: {
+              video_url_target: "input",
+              action: "input->video-url#validateUrl"
+            } %>
+        <div data-video-url-target="feedback"></div>
+        <div data-video-url-target="preview"></div>
 
-      <% if f.object.errors[:url].any? %>
-        <div class="alert alert-danger mt-2">
-          <% f.object.errors[:url].each do |error| %>
-            <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
-          <% end %>
-        </div>
-      <% end %>
+        <% if f.object.errors[:url].any? %>
+          <div class="alert alert-danger py-2 mt-2 mb-0">
+            <% f.object.errors[:url].each do |error| %>
+              <div><i class="fas fa-exclamation-circle me-1"></i> <%= error %></div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="pt-4">
+        <% if f.object.persisted? %>
+          <%= f.hidden_field :_destroy %>
+          <button type="button" class="btn btn-outline-danger btn-sm" title="Xóa video này khi lưu"
+                  data-action="nested-form#remove">
+            <i class="fas fa-trash me-1"></i>Xóa
+          </button>
+        <% else %>
+          <button type="button" class="btn btn-outline-danger btn-sm" title="Bỏ ô nhập này"
+                  data-action="nested-form#remove">
+            <i class="fas fa-trash me-1"></i>Xóa
+          </button>
+        <% end %>
+      </div>
     </div>
-
-    <% if f.object.persisted? %>
-      <div class="form-group mt-2">
-        <%= f.check_box :_destroy %>
-        <%= f.label :_destroy, "Delete this video URL" %>
-      </div>
-    <% else %>
-      <div class="form-group mt-2">
-        <%= link_to_remove_association "Delete", f, class: 'btn btn-danger btn-sm' %>
-      </div>
-    <% end %>
   </div>
 </div>

@@ -1,853 +1,147 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
   <div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><%= link_to 'Home', projects_path %></li>
-        <li class="breadcrumb-item"><%= link_to 'Projects', projects_path %></li>
+        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
         <li class="breadcrumb-item"><%= link_to @project.name, @project %></li>
-        <li class="breadcrumb-item active" aria-current="page">Manage Display Order</li>
+        <li class="breadcrumb-item active" aria-current="page">Sắp xếp nội dung</li>
       </ol>
     </nav>
-    <h2 class="mt-2 mb-0"><%= @project.name %> - Manage Display Order</h2>
+    <h2 class="mt-2 mb-0">Sắp xếp nội dung hiển thị</h2>
   </div>
+  <%= link_to project_path(@project), class: 'btn btn-outline-secondary' do %>
+    <i class="fas fa-arrow-left me-1"></i> Về trang dự án
+  <% end %>
 </div>
 
-<div class="card border-0 shadow-sm mb-4">
-  <div class="card-header bg-white py-3">
-    <h5 class="mb-0">Arrange Display Order</h5>
-    <p class="text-muted mb-0 small">Drag and drop to arrange the display order of images, descriptions and videos in the project</p>
-  </div>
-  <div class="card-body">
-    <%= form_with(url: update_content_project_path(@project), method: :post, local: true, id: "content-order-form") do |form| %>
-      <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="mb-0">Content Display Order</h6>
-          <div>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="collapse-all-btn">
-              <i class="fas fa-compress-alt me-1"></i> Collapse All
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-primary" id="expand-all-btn">
-              <i class="fas fa-expand-alt me-1"></i> Expand All
-            </button>
-          </div>
-        </div>
+<div data-controller="content-order"
+     data-content-order-url-value="<%= update_content_positions_project_path(@project) %>">
 
-        <div class="alert alert-info mb-3">
-          <i class="fas fa-info-circle me-2"></i>
-          Drag and drop items to change the display order. The order from top to bottom will be the display order in the project.
-        </div>
-
-        <div class="content-container" id="sortable-content">
-          <% if @content_items.present? %>
-            <% @content_items.each_with_index do |item, index| %>
-              <div class="content-item mb-3" data-id="<%= item[:id] %>" data-type="<%= item[:type] %>">
-                <div class="card">
-                  <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-                    <div class="d-flex align-items-center">
-                      <div class="drag-handle me-2">
-                        <i class="fas fa-grip-vertical text-muted"></i>
-                      </div>
-                      <h6 class="mb-0">
-                        <% if item[:type] == 'ProjectImage' %>
-                          <i class="fas fa-image text-primary me-1"></i> Image
-                        <% elsif item[:type] == 'Description' %>
-                          <i class="fas fa-align-left text-success me-1"></i> Description
-                        <% elsif item[:type] == 'VideoUrl' %>
-                          <i class="fas fa-video text-danger me-1"></i> Video
-                        <% end %>
-                        <span class="badge bg-secondary ms-1"><%= index + 1 %></span>
-                      </h6>
-                    </div>
-                    <div>
-                      <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-<%= item[:id] %>-<%= item[:type] %>">
-                        <i class="fas fa-chevron-down"></i>
-                      </button>
-                      <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="<%= item[:id] %>" data-type="<%= item[:type] %>">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="collapse show" id="content-<%= item[:id] %>-<%= item[:type] %>">
-                    <div class="card-body p-2">
-                      <% if item[:type] == 'ProjectImage' %>
-                        <div class="text-center">
-                          <img src="<%= item[:content].image_url %>" class="img-fluid" style="max-height: 200px;" alt="Project image">
-                        </div>
-                      <% elsif item[:type] == 'Description' %>
-                        <div class="description-content">
-                          <%= sanitize item[:content].content %>
-                        </div>
-                      <% elsif item[:type] == 'VideoUrl' %>
-                        <div class="text-center">
-                          <div class="embed-responsive">
-                            <% if item[:content].url.include?('youtube') %>
-                              <% video_id = item[:content].url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/) %>
-                              <% if video_id %>
-                                <iframe width="100%" height="200" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                              <% else %>
-                                <div class="alert alert-warning">
-                                  <i class="fas fa-exclamation-triangle me-2"></i>
-                                  Cannot display video. URL: <%= item[:content].url %>
-                                </div>
-                              <% end %>
-                            <% else %>
-                              <div class="alert alert-info">
-                                <i class="fas fa-link me-2"></i>
-                                Video URL: <%= item[:content].url %>
-                              </div>
-                            <% end %>
-                          </div>
-                        </div>
-                      <% end %>
-                      <input type="hidden" name="content_order[]" value="<%= item[:type] %>-<%= item[:id] %>">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          <% else %>
-            <div class="alert alert-warning">
-              <i class="fas fa-exclamation-triangle me-2"></i>
-              No content has been selected yet. Please add images, descriptions or videos for the project.
-            </div>
-          <% end %>
-        </div>
+  <!-- Khu 1: Nội dung đang hiển thị trên website -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="mb-0"><i class="fas fa-eye me-2 text-success"></i>Đang hiển thị trên website</h5>
+        <p class="text-muted mb-0 small">
+          Kéo <i class="fas fa-grip-vertical mx-1"></i> để đổi thứ tự (trên cùng hiển thị trước).
+          Mọi thay đổi được <strong>lưu tự động</strong>.
+        </p>
       </div>
-
-      <div class="mt-4">
-        <h6 class="mb-3">Unsorted Content</h6>
-
-        <ul class="nav nav-tabs" id="unorderedContentTab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
-              <i class="fas fa-image me-1"></i> Images (<%= @unordered_images.count %>)
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
-              <i class="fas fa-align-left me-1"></i> Descriptions (<%= @unordered_descriptions.count %>)
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-controls="videos-content" aria-selected="false">
-              <i class="fas fa-video me-1"></i> Videos (<%= @unordered_videos.count %>)
-            </button>
-          </li>
-        </ul>
-
-        <div class="tab-content p-3 border border-top-0 rounded-bottom" id="unorderedContentTabContent">
-          <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
-            <% if @unordered_images.present? %>
-              <div class="row g-3" id="unordered-images-container">
-                <% @unordered_images.each do |image| %>
-                  <div class="col-md-2 col-sm-3 col-4 unordered-item" data-id="<%= image.id %>" data-type="ProjectImage">
-                    <div class="card h-100">
-                      <img src="<%= image.image_url %>" class="card-img-top" alt="Project image">
-                      <div class="card-footer p-1 text-center">
-                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= image.id %>" data-type="ProjectImage">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                No unsorted images.
-              </div>
-            <% end %>
-          </div>
-
-          <div class="tab-pane fade" id="descriptions-content" role="tabpanel" aria-labelledby="descriptions-tab">
-            <% if @unordered_descriptions.present? %>
-              <div class="row g-3" id="unordered-descriptions-container">
-                <% @unordered_descriptions.each do |description| %>
-                  <div class="col-md-4 col-sm-6 unordered-item" data-id="<%= description.id %>" data-type="Description">
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <div class="description-preview">
-                          <%= sanitize description.content.truncate(100) %>
-                        </div>
-                      </div>
-                      <div class="card-footer p-1 text-center">
-                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= description.id %>" data-type="Description">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                No unsorted descriptions.
-              </div>
-            <% end %>
-          </div>
-
-          <div class="tab-pane fade" id="videos-content" role="tabpanel" aria-labelledby="videos-tab">
-            <% if @unordered_videos.present? %>
-              <div class="row g-3" id="unordered-videos-container">
-                <% @unordered_videos.each do |video| %>
-                  <div class="col-md-4 col-sm-6 unordered-item" data-id="<%= video.id %>" data-type="VideoUrl">
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <% if video.url.include?('youtube') %>
-                          <% video_id = video.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/) %>
-                          <% if video_id %>
-                            <iframe width="100%" height="200" src="https://www.youtube.com/embed/<%= video_id[1] %>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                          <% else %>
-                            <div class="alert alert-warning">
-                              <i class="fas fa-exclamation-triangle me-2"></i>
-                              Cannot display video. URL: <%= video.url %>
-                            </div>
-                          <% end %>
-                        <% else %>
-                          <div class="alert alert-info">
-                            <i class="fas fa-link me-2"></i>
-                            Video URL: <%= video.url %>
-                          </div>
-                        <% end %>
-                      </div>
-                      <div class="card-footer p-1 text-center">
-                        <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="<%= video.id %>" data-type="VideoUrl">
-                          <i class="fas fa-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                No unsorted videos.
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-
-      <div class="d-flex justify-content-between align-items-center mt-4">
-        <%= link_to project_path(@project), class: 'btn btn-secondary' do %>
-          <i class="fas fa-arrow-left me-1"></i> Back to Project
+      <div data-content-order-target="status"></div>
+    </div>
+    <div class="card-body">
+      <div id="sortable-content" data-content-order-target="sorted">
+        <% @content_items.each_with_index do |item, index| %>
+          <%= render 'content_order_item', content: item[:content], type: item[:type], position: index + 1 %>
         <% end %>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save me-1"></i> Save Changes
-        </button>
       </div>
+
+      <div class="alert alert-warning mb-0 <%= 'd-none' if @content_items.present? %>"
+           data-content-order-target="sortedEmpty">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        Chưa có nội dung nào được hiển thị — website sẽ không có gì để xem ở dự án này.
+        Bấm nút <strong>"+ Hiển thị"</strong> ở khu bên dưới để thêm ảnh, video hoặc mô tả.
+      </div>
+    </div>
+  </div>
+
+  <!-- Khu 2: Nội dung chưa hiển thị -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0"><i class="fas fa-eye-slash me-2 text-muted"></i>Chưa hiển thị</h5>
+      <p class="text-muted mb-0 small">Nội dung đã có trong dự án nhưng chưa được đưa lên website. Bấm <strong>"+ Hiển thị"</strong> để thêm vào danh sách phía trên.</p>
+    </div>
+    <div class="card-body">
+      <ul class="nav nav-tabs" id="unorderedContentTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="pool-images-tab" data-bs-toggle="tab" data-bs-target="#pool-images" type="button" role="tab">
+            <i class="fas fa-image me-1"></i> Ảnh (<span data-tab-count="ProjectImage"><%= @unordered_images.count %></span>)
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="pool-descriptions-tab" data-bs-toggle="tab" data-bs-target="#pool-descriptions" type="button" role="tab">
+            <i class="fas fa-align-left me-1"></i> Mô tả (<span data-tab-count="Description"><%= @unordered_descriptions.count %></span>)
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="pool-videos-tab" data-bs-toggle="tab" data-bs-target="#pool-videos" type="button" role="tab">
+            <i class="fas fa-video me-1"></i> Video (<span data-tab-count="VideoUrl"><%= @unordered_videos.count %></span>)
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content p-3 border border-top-0 rounded-bottom">
+        <div class="tab-pane fade show active" id="pool-images" role="tabpanel">
+          <div class="row g-3" data-unsorted-container="ProjectImage">
+            <% @unordered_images.each do |image| %>
+              <%= render 'content_pool_item', content: image, type: 'ProjectImage' %>
+            <% end %>
+          </div>
+          <div class="alert alert-light border mb-0 mt-2 <%= 'd-none' if @unordered_images.present? %>"
+               data-unsorted-empty="ProjectImage">
+            <i class="fas fa-check-circle me-2 text-success"></i>Tất cả ảnh đều đang được hiển thị.
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="pool-descriptions" role="tabpanel">
+          <div class="row g-3" data-unsorted-container="Description">
+            <% @unordered_descriptions.each do |description| %>
+              <%= render 'content_pool_item', content: description, type: 'Description' %>
+            <% end %>
+          </div>
+          <div class="alert alert-light border mb-0 mt-2 <%= 'd-none' if @unordered_descriptions.present? %>"
+               data-unsorted-empty="Description">
+            <i class="fas fa-check-circle me-2 text-success"></i>Tất cả mô tả đều đang được hiển thị.
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="pool-videos" role="tabpanel">
+          <div class="row g-3" data-unsorted-container="VideoUrl">
+            <% @unordered_videos.each do |video| %>
+              <%= render 'content_pool_item', content: video, type: 'VideoUrl' %>
+            <% end %>
+          </div>
+          <div class="alert alert-light border mb-0 mt-2 <%= 'd-none' if @unordered_videos.present? %>"
+               data-unsorted-empty="VideoUrl">
+            <i class="fas fa-check-circle me-2 text-success"></i>Tất cả video đều đang được hiển thị.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kho ẩn: bản render sẵn ở dạng còn lại của mỗi item, JS chỉ di chuyển node qua lại -->
+  <div class="d-none" data-content-order-target="sortedPool">
+    <% @unordered_images.each do |image| %>
+      <%= render 'content_order_item', content: image, type: 'ProjectImage', position: nil %>
+    <% end %>
+    <% @unordered_descriptions.each do |description| %>
+      <%= render 'content_order_item', content: description, type: 'Description', position: nil %>
+    <% end %>
+    <% @unordered_videos.each do |video| %>
+      <%= render 'content_order_item', content: video, type: 'VideoUrl', position: nil %>
+    <% end %>
+  </div>
+
+  <div class="d-none" data-content-order-target="unsortedPool">
+    <% @content_items.each do |item| %>
+      <%= render 'content_pool_item', content: item[:content], type: item[:type] %>
     <% end %>
   </div>
 </div>
 
 <style>
-  .content-item {
-    cursor: move;
-  }
-
   .drag-handle {
     cursor: grab;
-  }
-
-  .content-item.dragging {
-    opacity: 0.5;
-  }
-
-  .description-content {
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .description-preview {
-    max-height: 100px;
-    overflow: hidden;
   }
 
   .sortable-ghost {
     opacity: 0.4;
     background-color: #f8f9fa;
   }
+
+  .description-content {
+    max-height: 150px;
+    overflow-y: auto;
+  }
 </style>
-
-<script>
-  function initSortable() {
-    if (typeof Sortable !== 'undefined') {
-      const sortableContainer = document.getElementById('sortable-content');
-      if (sortableContainer) {
-        console.log('Initializing Sortable.js');
-        if (window.sortableInstance) {
-          window.sortableInstance.destroy();
-        }
-        window.sortableInstance = new Sortable(sortableContainer, {
-          animation: 150,
-          handle: '.drag-handle',
-          ghostClass: 'sortable-ghost',
-          onStart: function(evt) {
-            console.log('Drag started', evt);
-          },
-          onEnd: function(evt) {
-            console.log('Drag ended', evt);
-            updateOrderNumbers();
-            updateContentPositions();
-          }
-        });
-      }
-    }
-  }
-
-  function updateOrderNumbers() {
-    document.querySelectorAll('#sortable-content .content-item').forEach((item, index) => {
-      const badge = item.querySelector('.badge');
-      if (badge) {
-        badge.textContent = index + 1;
-      }
-    });
-  }
-
-  // Function to update content_position when dragging and dropping
-  function updateContentPositions() {
-    const contentItems = document.querySelectorAll('#sortable-content .content-item');
-    const positions = [];
-    
-    contentItems.forEach((item, index) => {
-      const contentId = item.dataset.id;
-      const contentType = item.dataset.type;
-      positions.push({
-        id: contentId,
-        type: contentType,
-        position: index + 1
-      });
-    });
-
-    console.log('Updating content positions:', positions);
-
-    // Get CSRF token from meta tag
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    // Send AJAX request to update order
-    fetch(`/projects/<%= @project.id %>/update_content_positions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({ positions: positions })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Content positions updated successfully:', data);
-      // Show success notification
-      showNotification('Content order updated successfully!', 'success');
-    })
-    .catch(error => {
-      console.error('Error updating content positions:', error);
-      // Show error notification
-      showNotification('An error occurred while updating content order!', 'error');
-    });
-  }
-
-  // Function to show notification
-  function showNotification(message, type) {
-    // Create Bootstrap notification
-    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-    
-    const notification = document.createElement('div');
-    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    notification.innerHTML = `
-      <i class="fas ${iconClass} me-2"></i>${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Auto hide after 3 seconds
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.remove();
-      }
-    }, 3000);
-  }
-
-  // Initialize Sortable when DOMContentLoaded or Turbo load
-  function readySortable() {
-    setTimeout(initSortable, 100);
-  }
-  document.addEventListener('DOMContentLoaded', readySortable);
-  document.addEventListener('turbo:load', readySortable);
-  document.addEventListener('turbo:render', readySortable);
-
-  // Handle collapse all button
-  const collapseAllBtn = document.getElementById('collapse-all-btn');
-  if (collapseAllBtn) {
-    collapseAllBtn.addEventListener('click', function() {
-      const collapseElements = document.querySelectorAll('#sortable-content .collapse');
-      collapseElements.forEach(collapse => {
-        // Use Bootstrap collapse API
-        if (window.bootstrap && bootstrap.Collapse) {
-          const bsCollapse = new bootstrap.Collapse(collapse);
-          bsCollapse.hide();
-        } else {
-          // Fallback if no Bootstrap JS
-          collapse.classList.remove('show');
-        }
-      });
-
-      document.querySelectorAll('.toggle-content i').forEach(icon => {
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-      });
-    });
-  }
-
-  // Handle expand all button
-  const expandAllBtn = document.getElementById('expand-all-btn');
-  if (expandAllBtn) {
-    expandAllBtn.addEventListener('click', function() {
-      const collapseElements = document.querySelectorAll('#sortable-content .collapse');
-      collapseElements.forEach(collapse => {
-        // Use Bootstrap collapse API
-        if (window.bootstrap && bootstrap.Collapse) {
-          const bsCollapse = new bootstrap.Collapse(collapse);
-          bsCollapse.show();
-        } else {
-          // Fallback if no Bootstrap JS
-          collapse.classList.add('show');
-        }
-      });
-
-      document.querySelectorAll('.toggle-content i').forEach(icon => {
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-      });
-    });
-  }
-
-  // Handle content toggle button
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('toggle-content') || e.target.closest('.toggle-content')) {
-      const button = e.target.classList.contains('toggle-content') ? e.target : e.target.closest('.toggle-content');
-      const icon = button.querySelector('i');
-
-      if (icon) {
-        if (icon.classList.contains('fa-chevron-down')) {
-          icon.classList.remove('fa-chevron-down');
-          icon.classList.add('fa-chevron-up');
-        } else {
-          icon.classList.remove('fa-chevron-up');
-          icon.classList.add('fa-chevron-down');
-        }
-      }
-    }
-  });
-
-  // Handle remove content button
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('remove-content') || e.target.closest('.remove-content')) {
-      e.preventDefault(); // Prevent default behavior
-      e.stopPropagation(); // Stop event propagation
-
-      const button = e.target.classList.contains('remove-content') ? e.target : e.target.closest('.remove-content');
-      const contentId = button.getAttribute('data-id');
-      const contentType = button.getAttribute('data-type');
-
-      console.log('Removing content:', contentId, contentType);
-
-      // Find parent element to remove
-      const contentItem = button.closest('.content-item');
-      if (contentItem) {
-        // Remove element from sorted list
-        contentItem.remove();
-
-        // Update order numbers
-        updateOrderNumbers();
-
-        // Reinitialize Sortable.js after removing element
-        initSortable();
-
-        // Update content_position after removing
-        updateContentPositions();
-
-        // Add back to unordered list
-        addToUnorderedList(contentId, contentType);
-      }
-    }
-  });
-
-  // Handle add to ordered list button
-  document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-to-order') || e.target.closest('.add-to-order')) {
-      const button = e.target.classList.contains('add-to-order') ? e.target : e.target.closest('.add-to-order');
-      const contentId = button.dataset.id;
-      const contentType = button.dataset.type;
-
-      // Find parent element to remove from unordered list
-      const unorderedItem = button.closest('.unordered-item');
-      if (unorderedItem) {
-        // Get necessary information before removing
-        let contentHtml = '';
-        let contentPreview = '';
-
-        if (contentType === 'ProjectImage') {
-          contentPreview = unorderedItem.querySelector('img').src;
-          contentHtml = `
-            <div class="text-center">
-              <img src="${contentPreview}" class="img-fluid" style="max-height: 200px;" alt="Project image">
-            </div>
-          `;
-        } else if (contentType === 'Description') {
-          contentPreview = unorderedItem.querySelector('.description-preview').innerHTML;
-          contentHtml = `
-            <div class="description-content">
-              ${contentPreview}
-            </div>
-          `;
-        } else if (contentType === 'VideoUrl') {
-          contentHtml = unorderedItem.querySelector('.card-body').innerHTML;
-        }
-
-        // Remove element from unordered list
-        unorderedItem.remove();
-
-        // Add to ordered list
-        addToOrderedList(contentId, contentType, contentHtml);
-
-        // Update content_position after adding
-        updateContentPositions();
-      }
-    }
-  });
-
-  // Function to add content to ordered list
-  function addToOrderedList(contentId, contentType, contentHtml) {
-    const sortableContainer = document.getElementById('sortable-content');
-    if (!sortableContainer) return;
-
-    // Create new element
-    const newItem = document.createElement('div');
-    newItem.className = 'content-item mb-3';
-    newItem.dataset.id = contentId;
-    newItem.dataset.type = contentType;
-
-    // Determine icon and content type name
-    let iconClass = '';
-    let typeName = '';
-
-    if (contentType === 'ProjectImage') {
-      iconClass = 'fas fa-image text-primary';
-      typeName = 'Image';
-    } else if (contentType === 'Description') {
-      iconClass = 'fas fa-align-left text-success';
-      typeName = 'Description';
-    } else if (contentType === 'VideoUrl') {
-      iconClass = 'fas fa-video text-danger';
-      typeName = 'Video';
-    }
-
-    // Get new order number
-    const newIndex = sortableContainer.querySelectorAll('.content-item').length + 1;
-
-    // Create HTML for new element
-    newItem.innerHTML = `
-      <div class="card">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-          <div class="d-flex align-items-center">
-            <div class="drag-handle me-2">
-              <i class="fas fa-grip-vertical text-muted"></i>
-            </div>
-            <h6 class="mb-0">
-              <i class="${iconClass} me-1"></i> ${typeName}
-              <span class="badge bg-secondary ms-1">${newIndex}</span>
-            </h6>
-          </div>
-          <div>
-            <button type="button" class="btn btn-sm btn-link toggle-content" data-bs-toggle="collapse" data-bs-target="#content-${contentId}-${contentType}">
-              <i class="fas fa-chevron-up"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger remove-content" data-id="${contentId}" data-type="${contentType}">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-        <div class="collapse show" id="content-${contentId}-${contentType}">
-          <div class="card-body p-2">
-            ${contentHtml}
-            <input type="hidden" name="content_order[]" value="${contentType}-${contentId}">
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Add to container
-    sortableContainer.appendChild(newItem);
-
-    // Remove warning if no more
-    const warningAlert = sortableContainer.querySelector('.alert-warning');
-    if (warningAlert) {
-      warningAlert.remove();
-    }
-
-    // Reinitialize Sortable.js after adding new element
-    initSortable();
-  }
-
-  // Function to add content to unordered list
-  function addToUnorderedList(contentId, contentType) {
-    console.log('Adding to unordered list:', contentId, contentType);
-
-    // Find corresponding container
-    let container;
-    if (contentType === 'ProjectImage') {
-      container = document.getElementById('unordered-images-container');
-    } else if (contentType === 'Description') {
-      container = document.getElementById('unordered-descriptions-container');
-    } else if (contentType === 'VideoUrl') {
-      container = document.getElementById('unordered-videos-container');
-    }
-
-    if (!container) {
-      console.error('Container not found for type:', contentType);
-      return;
-    }
-
-    // Find content in ordered list
-    const contentItem = document.querySelector(`.content-item[data-id="${contentId}"][data-type="${contentType}"]`);
-    if (contentItem) {
-      // Create new element for unordered list
-      const newItem = document.createElement('div');
-
-      if (contentType === 'ProjectImage') {
-        const imgElement = contentItem.querySelector('img');
-        if (imgElement) {
-          newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <img src="${imgElement.src}" class="card-img-top" alt="Project image">
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }
-      } else if (contentType === 'Description') {
-        const descriptionContent = contentItem.querySelector('.description-content');
-        if (descriptionContent) {
-          newItem.className = 'col-md-4 col-sm-6 unordered-item';
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="description-preview">
-                  ${descriptionContent.innerHTML}
-                </div>
-              </div>
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }
-      } else if (contentType === 'VideoUrl') {
-        const videoContent = contentItem.querySelector('.card-body');
-        if (videoContent) {
-          newItem.className = 'col-md-4 col-sm-6 unordered-item';
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                ${videoContent.innerHTML}
-              </div>
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      if (newItem.innerHTML) {
-        newItem.dataset.id = contentId;
-        newItem.dataset.type = contentType;
-
-        // Add to container
-        container.appendChild(newItem);
-
-        // Remove notification if exists
-        const infoAlert = container.querySelector('.alert-info');
-        if (infoAlert) {
-          infoAlert.remove();
-        }
-
-        // Switch to corresponding tab as active
-        if (contentType === 'ProjectImage') {
-          const tab = document.getElementById('images-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        } else if (contentType === 'Description') {
-          const tab = document.getElementById('descriptions-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        } else if (contentType === 'VideoUrl') {
-          const tab = document.getElementById('videos-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        }
-
-        return;
-      }
-    }
-
-    // If not found in DOM, then call API
-    // Create new element for unordered list
-    const newItem = document.createElement('div');
-
-    // Get information from API
-    fetch(`/projects/<%= @project.id %>/content_item?type=${contentType}&id=${contentId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (contentType === 'ProjectImage') {
-          newItem.className = 'col-md-2 col-sm-3 col-4 unordered-item';
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <img src="${data.image_url}" class="card-img-top" alt="Project image">
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        } else if (contentType === 'Description') {
-          newItem.className = 'col-md-4 col-sm-6 unordered-item';
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="description-preview">
-                  ${data.content}
-                </div>
-              </div>
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        } else if (contentType === 'VideoUrl') {
-          newItem.className = 'col-md-4 col-sm-6 unordered-item';
-
-          let videoContent = '';
-          if (data.url.includes('youtube')) {
-            const videoIdMatch = data.url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-            if (videoIdMatch) {
-              videoContent = `
-                <div class="embed-responsive">
-                  <iframe width="100%" height="150" src="https://www.youtube.com/embed/${videoIdMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-              `;
-            } else {
-              videoContent = `
-                <div class="alert alert-warning">
-                  <i class="fas fa-exclamation-triangle me-2"></i>
-                  Cannot display video
-                </div>
-              `;
-            }
-          } else {
-            videoContent = `
-              <div class="alert alert-info">
-                <i class="fas fa-link me-2"></i>
-                Video URL: ${data.url}
-              </div>
-            `;
-          }
-
-          newItem.innerHTML = `
-            <div class="card h-100">
-              <div class="card-body">
-                ${videoContent}
-              </div>
-              <div class="card-footer p-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-primary add-to-order" data-id="${contentId}" data-type="${contentType}">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }
-
-        newItem.dataset.id = contentId;
-        newItem.dataset.type = contentType;
-
-        // Add to container
-        container.appendChild(newItem);
-
-        // Remove notification if exists
-        const infoAlert = container.querySelector('.alert-info');
-        if (infoAlert) {
-          infoAlert.remove();
-        }
-
-        // Switch to corresponding tab as active
-        if (contentType === 'ProjectImage') {
-          const tab = document.getElementById('images-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        } else if (contentType === 'Description') {
-          const tab = document.getElementById('descriptions-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        } else if (contentType === 'VideoUrl') {
-          const tab = document.getElementById('videos-tab');
-          if (tab && typeof bootstrap !== 'undefined') {
-            const tabInstance = new bootstrap.Tab(tab);
-            tabInstance.show();
-          } else if (tab) {
-            tab.click();
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching content item:', error);
-        // Don't show alert here anymore
-      });
-  }
-</script>

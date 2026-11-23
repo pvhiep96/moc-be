@@ -1,0 +1,275 @@
+# =============================================================================
+# SƠ ĐỒ NỘI DUNG WEBSITE — nguồn sự thật duy nhất cho trình "Sửa giao diện".
+#
+# Mỗi trang (page) gồm nhiều khu vực (section), mỗi khu vực có các ô nhập (field).
+#   key     : tên lưu trong DB, frontend gắn vào phần tử bằng data-edit="<key>"
+#   label   : tên hiển thị cho người quản trị
+#   where   : mô tả VỊ TRÍ trên website — để người sửa biết chữ này nằm ở đâu
+#   type    : text | textarea | url | email | image | video | images | projects | boolean | lines | list
+#             images = nhiều ảnh ; projects = chọn dự án ; empty_note = ý nghĩa khi để trống
+#             lines = mỗi dòng là 1 mục ; list = danh sách có nhiều trường (item_fields)
+#   default : giá trị gốc (bấm "Khôi phục mặc định" sẽ quay về giá trị này)
+#
+# Thêm ô nhập mới: thêm vào đây + dùng c('<key>') / e('<key>') ở frontend,
+# rồi chạy `bin/rails site_content:export_defaults` để cập nhật giá trị dự phòng của FE.
+# =============================================================================
+pages:
+  - id: home
+    name: Trang chủ
+    path: /
+    icon: fa-house
+    sections:
+      - id: hero
+        name: "1. Màn mở đầu (Hero)"
+        where: Màn hình đầu tiên khi vào website — ảnh xếp chồng rồi bung toàn màn hình, logo MOC ở giữa.
+        fields:
+          - { key: hero_images, label: Ảnh màn mở đầu, where: "Các ảnh xếp chồng lần lượt hiện ra trước khi bung toàn màn hình", type: images, max: 8, empty_note: "Để trống = tự lấy ảnh bìa & ảnh hover của các dự án", default: [] }
+          - { key: hero_video, label: Video nền màn mở đầu, where: "Video phát phía sau số lớn khi màn mở đầu bung toàn màn hình", type: video, empty_note: "Để trống = video dọc của dự án đầu tiên có video", default: "" }
+          - { key: hero_decade_num, label: Số lớn phía sau logo, where: "Con số khổng lồ mờ phía sau logo MOC", type: text, default: "10" }
+          - { key: hero_caption_left, label: Câu giới thiệu bên trái, where: "Góc trên bên trái màn mở đầu", type: textarea, default: "A creative studio specializing in wedding film & photography, based in Vietnam." }
+          - { key: hero_caption_right, label: Câu giới thiệu bên phải, where: "Góc trên bên phải màn mở đầu", type: textarea, default: "Two hearts, one vision. Capturing timeless love stories for over a decade." }
+          - { key: hero_caption_bl, label: Chữ góc dưới trái, where: "Góc dưới bên trái (tọa độ vĩ độ)", type: text, default: "10°46'37\" N" }
+          - { key: hero_caption_bc, label: Chữ giữa phía dưới, where: "Chính giữa cạnh dưới màn mở đầu", type: text, default: "Saigon, Vietnam" }
+          - { key: hero_caption_br, label: Chữ góc dưới phải, where: "Góc dưới bên phải (tọa độ kinh độ)", type: text, default: "106°42'03\" E" }
+      - id: philosophy
+        name: "2. Triết lý (chữ sáng theo chuột)"
+        where: Khối chữ lớn nền tối ngay dưới màn mở đầu, chữ sáng lên theo con trỏ chuột.
+        fields:
+          - { key: philosophy_line_1, label: Dòng 1 (thụt đầu dòng), where: "Dòng đầu tiên của đoạn triết lý", type: text, default: "We believe in love and its pure beauty, told through" }
+          - { key: philosophy_line_2, label: Dòng 2, where: "Dòng thứ 2 của đoạn triết lý", type: text, default: "light, motion, and timeless frames. For us, the art" }
+          - { key: philosophy_line_3, label: Dòng 3, where: "Dòng thứ 3 của đoạn triết lý", type: text, default: "lies in the quiet moments between two hearts—the" }
+          - { key: philosophy_line_4, label: Dòng 4, where: "Dòng thứ 4 của đoạn triết lý", type: text, default: "glances, the laughter, the unspoken warmth that makes" }
+          - { key: philosophy_line_5, label: Dòng 5, where: "Dòng cuối của đoạn triết lý", type: text, default: "every story uniquely yours and forever remembered." }
+      - id: orbit
+        name: "3. Emotion, light, cinema (bàn ảnh 3D)"
+        where: Khu vực ảnh/video của các dự án xếp thành bàn ảnh 3D, tiêu đề lớn ở giữa.
+        fields:
+          - { key: orbit_images, label: Ảnh trên bàn ảnh 3D, where: "3 hàng ảnh trôi ngang phía sau tiêu đề “Emotion, light, cinema”", type: images, max: 20, empty_note: "Để trống = tự lấy ảnh/video của các dự án", default: [] }
+          - { key: orbit_reel_label, label: Nhãn nhỏ góc phải, where: "Dòng chữ nhỏ phía trên tiêu đề, bên phải bộ đếm 01 / 20", type: text, default: "35MM F/1.4 · ISO 400" }
+          - { key: orbit_title_line_1, label: Tiêu đề dòng 1, where: "Dòng trên của tiêu đề lớn", type: text, default: "Emotion, light, cinema:" }
+          - { key: orbit_title_line_2, label: Tiêu đề dòng 2, where: "Dòng dưới của tiêu đề lớn", type: text, default: "The foundations of our work" }
+      - id: marquee
+        name: "4. Chữ khổng lồ “Works”"
+        where: Màn chữ cực lớn từng ký tự trồi lên khi cuộn, nằm trước danh sách tác phẩm.
+        fields:
+          - { key: marquee_word_1, label: Chữ khổng lồ, where: "Chữ lớn ở giữa màn hình (nên ≤ 5 ký tự)", type: text, default: "Works" }
+      - id: selected_works
+        name: "5. Selected Works (danh sách cặp đôi)"
+        where: Thanh tiêu đề phía trên danh sách tác phẩm. Tên cặp đôi lấy từ mục Dự án.
+        fields:
+          - { key: works_top_left_label, label: Nhãn trái, where: "Thanh tiêu đề — bên trái", type: text, default: "Selected Works" }
+          - { key: works_top_quote, label: Câu trích dẫn giữa, where: "Thanh tiêu đề — ở giữa", type: textarea, default: "Every decision, every detail is a lever, each one working to make the story live forever" }
+          - { key: works_top_right_label, label: Nhãn phải, where: "Thanh tiêu đề — bên phải", type: text, default: "Explore" }
+      - id: featured_works
+        name: "6. Featured Works"
+        where: Thanh tiêu đề phía dưới danh sách tác phẩm / trước phần trình chiếu dự án nổi bật.
+        fields:
+          - { key: works_bottom_left_label, label: Nhãn trái, where: "Thanh tiêu đề dưới — bên trái", type: text, default: "Featured Works" }
+          - { key: works_bottom_quote, label: Câu trích dẫn giữa, where: "Thanh tiêu đề dưới — ở giữa", type: textarea, default: "Films and photographs that reflect our heart, vision, and craft" }
+          - { key: works_bottom_right_label, label: Nhãn phải, where: "Thanh tiêu đề dưới — bên phải", type: text, default: "Explore" }
+          - { key: featured_project_ids, label: Dự án trình chiếu nổi bật, where: "Phần lật trang ảnh toàn màn hình ngay sau thanh Featured Works (ảnh bìa của từng dự án)", type: projects, max: 5, empty_note: "Không chọn = tự lấy 5 dự án có nhiều phim nhất", default: [] }
+      - id: footer
+        name: "7. Chân trang liên hệ"
+        where: Phần cuối trang chủ, có ảnh/video chân dung và các link liên hệ. Link mạng xã hội sửa ở tab “Dùng chung”.
+        fields:
+          - { key: footer_image, label: Ảnh chân dung, where: "Ảnh lớn bên trái chân trang (hiện khi không có video, và làm ảnh chờ của video)", type: image, default: "/about-moc.webp" }
+          - { key: footer_show_video, label: Phát video thay cho ảnh, where: "Bật = chân trang phát video; tắt = chỉ hiện ảnh chân dung", type: boolean, default: true }
+          - { key: footer_video, label: Video chân trang, where: "Video thay cho ảnh chân dung ở chân trang", type: video, empty_note: "Để trống = video dọc của dự án đầu tiên có video", default: "" }
+          - { key: footer_headline, label: Câu tiêu đề lớn, where: "Câu chữ lớn cạnh ảnh chân dung", type: textarea, default: "Capturing timeless love stories through cinema and photography" }
+          - { key: footer_mail_label, label: Nhãn phía trên email, where: "Dòng chữ nhỏ ngay trên địa chỉ email", type: text, default: "For inquiries & collaborations:" }
+          - { key: footer_email, label: Email hiển thị, where: "Địa chỉ email (bấm vào sẽ mở trang Contact)", type: email, default: "info@mocnguyenproductions.com" }
+
+  - id: gallery
+    name: Gallery
+    path: /studio
+    icon: fa-table-cells-large
+    note: "Trang này chỉ hiển thị lưới dự án. Click vào một ô dự án ở khung xem trước để đổi ảnh bìa, ảnh hover hoặc sửa nội dung dự án đó."
+    sections: []
+
+  - id: project
+    name: Chi tiết dự án
+    path: /projects/:id
+    icon: fa-film
+    note: "Ảnh, video, mô tả của từng dự án được sửa trong trình sửa dự án. Click vào vùng nội dung ở khung xem trước để mở đúng dự án đó."
+    sections:
+      - id: project_ui
+        name: Nút và chữ điều hướng
+        where: Các nút nhỏ dùng chung cho mọi trang chi tiết dự án.
+        fields:
+          - { key: project_back_label, label: Nút quay lại, where: "Góc trên trái (chỉ trên máy tính)", type: text, default: "Back to Projects" }
+          - { key: project_view_detail_label, label: Nút xem chi tiết, where: "Góc trên phải — mở chế độ album ảnh/video", type: text, default: "View Detail" }
+          - { key: project_scroll_hint, label: Gợi ý cuộn, where: "Dòng chữ nhỏ góc dưới phải (máy tính) / dưới tên dự án (điện thoại)", type: text, default: "Scroll to view more" }
+
+  - id: about
+    name: About
+    path: /about
+    icon: fa-user-group
+    sections:
+      - id: about_header
+        name: Tiêu đề trang
+        where: Phần đầu trang About.
+        fields:
+          - { key: about_title, label: Tiêu đề lớn, where: "Chữ to nhất đầu trang", type: text, default: "ABOUT US" }
+          - { key: about_subtitle, label: Dòng phụ cạnh tiêu đề, where: "Bên phải tiêu đề, ngăn bằng gạch dọc (xuống dòng bằng Enter)", type: textarea, default: "HUSBAND AND WIFE\nWEDDING DUO" }
+      - id: about_moc
+        name: Giới thiệu Mộc
+        where: Khối thứ nhất — đoạn văn bên trái, ảnh chân dung bên phải.
+        fields:
+          - { key: about_moc_bio, label: Đoạn giới thiệu, where: "Đoạn văn bên trái ảnh (để 1 dòng trống giữa các đoạn)", type: textarea, rows: 10, default: "Capturing love with soul, through the eyes of cinema and the heart of an artist.\n\nHe is a film nerd and music lover at heart, and a storyteller who sees beauty in the details most people overlook. With a deep sensitivity to emotion naturally, he read the energy of a room easily, noticing the unspoken moments, the subtle shifts in mood, the quiet gestures that speak volumes.\n\nMaybe it's the perfectionist in him (yes, he's an OCD), but Moc believes every frame should be crafted not just to look beautiful, but to hold meaning.\n\nMoc is most drawn to the subtle moments: a soft touch, a teary smile, a shared glance. He has a deep respect for the trust couples place in him, and approaches each wedding with sensitivity, intention, and soul." }
+          - { key: about_moc_image, label: Ảnh chân dung, where: "Ảnh đen trắng bên phải đoạn văn", type: image, default: "/about-moc.webp" }
+          - { key: about_moc_caption, label: Chú thích ảnh, where: "Dòng chữ nhỏ dưới ảnh", type: text, default: "MOC • Co-Founder, Film Director" }
+      - id: about_vy
+        name: Giới thiệu Vy
+        where: Khối thứ hai — ảnh chân dung bên trái, đoạn văn căn phải.
+        fields:
+          - { key: about_vy_bio, label: Đoạn giới thiệu, where: "Đoạn văn căn phải, bên phải ảnh", type: textarea, rows: 8, default: "As a mother, a woman rooted in family, and a lover of fashion and beauty, she understands how much this day means not only to the bride but to everyone who holds her close.\n\nWith that understanding, her approach to weddings blends editorial elegance with heartfelt documentary. She pays attention to the little things that matter: the textures, the styling, the energy in the room, allowing each moment to unfold naturally while preserving its timeless charm.\n\nWhether your wedding is kissed by the golden glow sunset or wrapped in the moody romance reception, they are here to preserve not just how it looked, but how it felt." }
+          - { key: about_vy_image, label: Ảnh chân dung, where: "Ảnh đen trắng bên trái đoạn văn", type: image, default: "/about-vy.webp" }
+          - { key: about_vy_caption, label: Chú thích ảnh, where: "Dòng chữ nhỏ dưới ảnh", type: text, default: "VY • Co-Founder, Art Director" }
+      - id: about_quote
+        name: Câu trích dẫn
+        where: Câu chữ nghiêng ở giữa trang, giữa phần giới thiệu và Awards.
+        fields:
+          - { key: about_quote, label: Câu trích dẫn, where: "Giữa trang, font có chân", type: textarea, default: "\"Two Hearts, One Vision — Capturing Love for Over a Decade\"" }
+      - id: about_awards
+        name: Giải thưởng
+        where: Mục AWARDS — danh sách giải thưởng chia 2 cột, mỗi dòng có biểu tượng 🏆.
+        fields:
+          - { key: about_awards_title, label: Tiêu đề mục, where: "Chữ AWARDS", type: text, default: "AWARDS" }
+          - { key: about_awards, label: Danh sách giải thưởng, where: "Mỗi dòng là 1 giải thưởng", type: lines, default: ["WEVA 2017 Judges", "Junebug Weddings 2024 Choice Awards", "Luxuo 2023's Best Wedding Videographer", "Vietnam Wedding Awards 2024's Cinematographer"] }
+      - id: about_featured
+        name: Báo chí (Featured)
+        where: Mục FEATURED — các link bài báo ở giữa, 2 ảnh đen trắng hai bên.
+        fields:
+          - { key: about_featured_title, label: Tiêu đề mục, where: "Chữ FEATURED", type: text, default: "FEATURED" }
+          - key: about_press
+            label: Danh sách bài báo
+            where: "Các link gạch chân ở giữa mục Featured"
+            type: list
+            item_label: Bài báo
+            item_fields:
+              - { key: name, label: Tên tờ báo, type: text }
+              - { key: url, label: Link bài viết, type: url }
+            default:
+              - { name: Luxuo, url: "https://luxuo.vn/wedding/vietnam-luxury-wedding-list-3-moc-nguyen-nhin-ra-the-gioi-de-biet-minh-dang-o-dau.html" }
+              - { name: Wow Weekend, url: "https://www.wowweekend.vn/vi/blog/Moc-Nguyen-Khi-phim-cuoi-cung-la-tac-pham-nghe-thuat-2307" }
+              - { name: Wedding Symphony, url: "https://www.lofficielvietnam.com/wedding-symphony/moc-nguyen-chung-ta-co-the-chieu-khach-hang-chieu-ca-cai-toi-cua-minh" }
+              - { name: Harper Bazaar, url: "https://bazaarvietnam.vn/nhan-vat/hoang-nguyen-dien-anh-hoa-nhung-thuoc-phim-cho-ngay-chung-doi/" }
+          - { key: about_featured_image_1, label: Ảnh ngang (dưới trái), where: "Ảnh ngang góc dưới bên trái mục Featured", type: image, default: "/featured1.webp" }
+          - { key: about_featured_image_2, label: Ảnh dọc (bên phải), where: "Ảnh dọc bên phải mục Featured", type: image, default: "/featured2.webp" }
+      - id: about_footer
+        name: Chân trang
+        where: Cuối trang About. Link mạng xã hội sửa ở tab “Dùng chung”.
+        fields:
+          - { key: about_follow_label, label: Dòng chữ chân trang, where: "Chữ phía trên 2 biểu tượng Facebook / Instagram", type: text, default: "FOLLOW US ON SOCIAL" }
+
+  - id: contact
+    name: Contact
+    path: /contact
+    icon: fa-envelope
+    sections:
+      - id: contact_header
+        name: Tiêu đề trang
+        where: Phần đầu trang Contact, phía trên form.
+        fields:
+          - { key: contact_title, label: Tiêu đề lớn, where: "Chữ to bên trái (xuống dòng bằng Enter)", type: textarea, default: "CONNECT\nWITH US" }
+          - { key: contact_intro, label: Lời mời, where: "Đoạn chữ nhỏ bên phải tiêu đề", type: textarea, default: "TO REACH MOC OR TO REQUEST A DETAILED QUOTA, PLEASE FEEL FREE TO FILL OUT YOUR INFORMATION AND WE WILL CONTACT YOU WITHIN 24 HOURS." }
+      - id: contact_form
+        name: Lựa chọn trong form
+        where: Các ô chọn (dropdown) trong form liên hệ màu xám.
+        fields:
+          - { key: contact_event_types, label: Loại sự kiện, where: "Dropdown “Event Type” — mỗi dòng 1 lựa chọn", type: lines, default: ["Wedding", "Engagement", "Other"] }
+          - { key: contact_roles, label: Vai trò, where: "Dropdown “What is your role?” — mỗi dòng 1 lựa chọn", type: lines, default: ["Bride", "Groom", "Planner", "Other"] }
+          - { key: contact_budgets, label: Ngân sách, where: "Dropdown “Budget” — mỗi dòng 1 lựa chọn", type: lines, default: ["Under $10,000", "$10,000 - $30,000", "$30,000 - $50,000", "Over $50,000"] }
+          - { key: contact_sources, label: Biết đến qua đâu, where: "Dropdown “How did you hear about us?” — mỗi dòng 1 lựa chọn", type: lines, default: ["Instagram", "Google", "Friend", "Other"] }
+          - { key: contact_consent, label: Điều khoản đồng ý, where: "Chữ nhỏ cạnh ô tick cuối form", type: textarea, default: "I CONSENT FOR THE INFORMATION SUBMITTED ABOVE TO BE RECORDED AND STORED FOR THE PURPOSES OF PROVIDING SERVICES RELATING TO MY INQUIRY. I AGREE THAT REGISTRATION ON OUR SITE OR THE MOC PRODUCTIONS SITE CONSTITUTES AGREEMENT TO ITS USER AGREEMENT & PRIVACY POLICY" }
+          - { key: contact_send_label, label: Nút gửi, where: "Nút góc dưới phải form", type: text, default: "SEND" }
+          - { key: contact_success, label: Thông báo gửi thành công, where: "Khung xanh hiện ra sau khi khách gửi form", type: textarea, default: "Thank you for your message! We will get back to you within 24 hours." }
+      - id: contact_footer
+        name: Chân trang
+        where: Phần cuối trang Contact, dưới form.
+        fields:
+          - { key: contact_email, label: Email, where: "Chân trang — bên trái, dòng đầu", type: email, default: "info@mocproductions.com" }
+          - { key: contact_phone, label: Số điện thoại, where: "Chân trang — bên trái, dòng 2", type: text, default: "+84906863992" }
+          - { key: contact_messengers, label: Ứng dụng nhắn tin, where: "Chân trang — bên trái, dòng 3", type: text, default: "whatsapp telegram imessage" }
+          - { key: contact_copyright, label: Bản quyền, where: "Chân trang — bên phải", type: textarea, default: "©2025 moc-production\n- ALL RIGHTS RESERVED" }
+          - { key: contact_big_word, label: Chữ lớn cuối trang, where: "Chữ rất to ở đáy trang", type: text, default: "MOC" }
+
+  - id: pricing
+    name: Bảng giá
+    path: /pricing321123
+    icon: fa-tags
+    note: "Trang ẩn — chỉ ai có link /pricing321123 mới xem được."
+    sections:
+      - id: pricing_header
+        name: Tiêu đề
+        where: Ô đầu tiên (máy tính) / đầu trang (điện thoại).
+        fields:
+          - { key: pricing_title, label: Tiêu đề, where: "Chữ lớn đầu tiên (xuống dòng bằng Enter)", type: textarea, default: "Our Services\n& Pricing" }
+          - { key: pricing_popular_badge, label: Nhãn gói nổi bật, where: "Nhãn đen góc trên phải của gói được đánh dấu nổi bật", type: text, default: "Most Popular" }
+      - id: pricing_packages
+        name: Các gói dịch vụ
+        where: Các thẻ gói dịch vụ (cuộn ngang trên máy tính).
+        fields:
+          - key: pricing_packages
+            label: Gói dịch vụ
+            where: "Mỗi mục là 1 thẻ gói; tính năng mỗi dòng 1 ý"
+            type: list
+            item_label: Gói
+            item_fields:
+              - { key: name, label: Tên gói, type: text }
+              - { key: description, label: Mô tả ngắn, type: text }
+              - { key: price, label: Giá (USD, chỉ nhập số), type: text }
+              - { key: features, label: Tính năng (mỗi dòng 1 ý), type: lines }
+              - { key: popular, label: Đánh dấu nổi bật, type: boolean }
+            default:
+              - { name: Basic Package, description: Perfect for small events and personal projects, price: "500", features: ["2 hours of shooting", "50 edited photos", "Digital delivery", "1 photographer"], popular: false }
+              - { name: Standard Package, description: Our most popular choice for events and commercial projects, price: "1200", features: ["4 hours of shooting", "150 edited photos", "Digital delivery", "2 photographers", "Basic retouching"], popular: true }
+              - { name: Premium Package, description: Complete coverage for professional needs, price: "2500", features: ["Full day shooting", "300+ edited photos", "Digital delivery", "2 photographers", "Advanced retouching", "Printed photo album"], popular: false }
+      - id: pricing_options
+        name: Tùy chọn thêm
+        where: Thẻ “Additional Options” sau các gói.
+        fields:
+          - { key: pricing_options_title, label: Tiêu đề thẻ, where: "Tiêu đề thẻ tùy chọn", type: text, default: "Additional Options" }
+          - key: pricing_options
+            label: Danh sách tùy chọn
+            where: "Mỗi mục là 1 dòng có công tắc bật/tắt"
+            type: list
+            item_label: Tùy chọn
+            item_fields:
+              - { key: name, label: Tên, type: text }
+              - { key: description, label: Mô tả, type: text }
+              - { key: price, label: Giá (USD, chỉ nhập số), type: text }
+            default:
+              - { name: Additional Hour, description: Extend your shooting time, price: "150" }
+              - { name: Extra Photographer, description: Add another professional to your team, price: "300" }
+              - { name: Rush Delivery, description: Get your photos within 48 hours, price: "200" }
+              - { name: Drone Photography, description: Aerial shots of your event or location, price: "350" }
+              - { name: Video Highlights, description: 3-5 minute highlight video of your event, price: "500" }
+      - id: pricing_summary
+        name: Tổng kết
+        where: Thẻ cuối cùng, tính tổng tiền.
+        fields:
+          - { key: pricing_summary_title, label: Tiêu đề thẻ, where: "Tiêu đề thẻ tổng kết", type: text, default: "Your Custom Package" }
+          - { key: pricing_booking_label, label: Nút đặt lịch, where: "Nút đen cuối thẻ tổng kết", type: text, default: "Request Booking" }
+
+  - id: global
+    name: Dùng chung
+    path: /about
+    icon: fa-globe
+    note: "Những nội dung này xuất hiện trên nhiều trang. Khung xem trước sẽ tự mở menu khi bạn chọn một mục menu."
+    sections:
+      - id: menu
+        name: Menu toàn màn hình
+        where: Màn đen hiện ra khi bấm chữ MENU ở cạnh phải (trang Gallery, About, Contact, chi tiết dự án).
+        fields:
+          - { key: menu_home_label, label: Mục 1, where: "Chữ lớn thứ nhất — dẫn về Trang chủ", type: text, default: "HOME" }
+          - { key: menu_projects_label, label: Mục 2, where: "Chữ lớn thứ hai — dẫn tới Gallery", type: text, default: "PROJECTS" }
+          - { key: menu_about_label, label: Mục 3, where: "Chữ lớn thứ ba — dẫn tới About", type: text, default: "ABOUT US" }
+          - { key: menu_contact_label, label: Mục liên hệ, where: "Chữ lớn góc dưới phải menu — dẫn tới Contact", type: text, default: "CONTACT" }
+      - id: social
+        name: Mạng xã hội
+        where: "Dùng ở: góc trên phải menu, chân trang About, chân trang Trang chủ."
+        fields:
+          - { key: social_facebook, label: Link Facebook, where: "Menu (FACEBOOK), chân trang About, chân trang Trang chủ", type: url, default: "https://www.facebook.com/mocnguyen.productions" }
+          - { key: social_instagram, label: Link Instagram, where: "Menu (INSTAGRAM), chân trang About, chân trang Trang chủ", type: url, default: "https://www.instagram.com/mocnguyenproductions/" }
+          - { key: social_youtube, label: Link YouTube, where: "Menu (YOUTUBE), chân trang Trang chủ", type: url, default: "https://www.youtube.com/@MocNguyenProductions" }

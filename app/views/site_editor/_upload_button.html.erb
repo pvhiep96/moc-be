@@ -1,0 +1,12 @@
+<div class="se-upload">
+  <label class="btn btn-sm btn-outline-primary mb-0">
+    <i class="fas fa-upload me-1"></i><%= label %>
+    <input type="file" hidden data-kind="<%= kind %>" <%= 'multiple' if multiple %>
+           accept="<%= kind == 'video' ? 'video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp,image/gif,image/avif' %>"
+           data-action="change->site-editor#uploadFiles">
+  </label>
+  <div class="se-progress se-hidden" data-role="progress">
+    <div class="se-progress-track"><div class="se-progress-bar" data-role="progress-bar"></div></div>
+    <span data-role="progress-text"></span>
+  </div>
+</div>

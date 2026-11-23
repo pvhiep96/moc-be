@@ -20,8 +20,17 @@ ENV BUNDLE_PATH /$APP_ROOT/vendor/bundle
 ENV BUNDLE_BIN /$APP_ROOT/vendor/bundle/bin
 ENV PATH $BUNDLE_BIN:$BUNDLE_PATH/gems/bin:$PATH
 
-RUN rails assets:precompile
-COPY ./docker-entrypoint.sh /
+# Copy Gemfile and Gemfile.lock
+COPY Gemfile Gemfile.lock ./
+
+# Install gems
+RUN bundle install --jobs=4 --retry=3
+
+# Copy application code
+COPY . .
+
+# Copy docker entrypoint script
+COPY docker/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE ${APP_PORT}

@@ -1,0 +1,122 @@
+<%# Một ô nhập. Giá trị được JS (site_editor_controller) điền từ valuesJson khi mở trang. %>
+<% key = field['key'] %>
+<% input_id = "se-input-#{key}" %>
+<div class="se-field" id="se-field-<%= key %>"
+     data-site-editor-target="field"
+     data-key="<%= key %>" data-type="<%= field['type'] %>" data-page="<%= page_id %>" data-max="<%= field['max'] %>"
+     data-search="<%= [field['label'], field['where'], key].join(' ').downcase %>">
+  <div class="se-field-head">
+    <label for="<%= input_id %>"><%= field['label'] %></label>
+    <span class="se-field-badge">Chưa lưu</span>
+    <div class="se-field-tools">
+      <button type="button" class="se-icon-btn" title="Chỉ vị trí trên trang" data-action="site-editor#locate"><i class="fas fa-crosshairs"></i></button>
+      <button type="button" class="se-icon-btn" title="Khôi phục nội dung mặc định" data-action="site-editor#resetField"><i class="fas fa-clock-rotate-left"></i></button>
+    </div>
+  </div>
+  <div class="se-where"><i class="fas fa-location-dot"></i><span><%= field['where'] %></span></div>
+
+  <% case field['type'] %>
+  <% when 'textarea' %>
+    <textarea id="<%= input_id %>" class="form-control" rows="<%= field['rows'] || 3 %>" data-role="input"></textarea>
+  <% when 'lines' %>
+    <textarea id="<%= input_id %>" class="form-control" rows="4" data-role="input"></textarea>
+    <div class="form-text">Mỗi dòng là một mục. Dòng trống sẽ bị bỏ qua.</div>
+  <% when 'image' %>
+    <div class="se-image-row">
+      <img class="se-image-thumb" alt="" data-role="thumb">
+      <div class="flex-grow-1">
+        <input id="<%= input_id %>" type="text" class="form-control" data-role="input" placeholder="Dán link ảnh hoặc bấm Tải ảnh lên">
+        <%= render 'upload_button', kind: 'image', multiple: false, label: 'Tải ảnh lên' %>
+        <div class="form-text">Hoặc dán link chia sẻ file Google Drive (quyền “Bất kỳ ai có đường liên kết”).</div>
+      </div>
+    </div>
+  <% when 'video' %>
+    <video class="se-video-preview se-hidden" data-role="video-preview" muted playsinline controls preload="metadata"></video>
+    <input id="<%= input_id %>" type="text" class="form-control" data-role="input" placeholder="Bấm Tải video lên, hoặc dán link file .mp4">
+    <%= render 'upload_button', kind: 'video', multiple: false, label: 'Tải video lên' %>
+    <div class="form-text">MP4 / WebM / MOV, tối đa 500MB. Nên nén video dưới 30MB để trang tải nhanh. Không dùng link YouTube.</div>
+  <% when 'images' %>
+    <div class="se-gallery" data-role="gallery"></div>
+    <template data-role="gallery-template">
+      <div class="se-gallery-item" data-role="gallery-item">
+        <img alt="">
+        <span class="se-gallery-index" data-role="gallery-index"></span>
+        <div class="se-gallery-tools">
+          <button type="button" title="Đưa lên trước" data-action="site-editor#moveImageLeft"><i class="fas fa-arrow-left"></i></button>
+          <button type="button" title="Đưa ra sau" data-action="site-editor#moveImageRight"><i class="fas fa-arrow-right"></i></button>
+          <button type="button" title="Bỏ ảnh này" class="text-danger" data-action="site-editor#removeImage"><i class="fas fa-xmark"></i></button>
+        </div>
+      </div>
+    </template>
+    <div class="se-gallery-empty" data-role="gallery-empty"><i class="fas fa-images"></i> Chưa chọn ảnh nào</div>
+    <div class="d-flex gap-2 mt-2">
+      <input type="text" class="form-control form-control-sm" data-role="gallery-link" placeholder="Dán link ảnh rồi bấm Thêm">
+      <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-action="site-editor#addImageLink">Thêm</button>
+    </div>
+    <%= render 'upload_button', kind: 'image', multiple: true, label: 'Tải nhiều ảnh lên' %>
+    <% if field['max'] %><div class="form-text">Tối đa <%= field['max'] %> ảnh. Thứ tự trong danh sách = thứ tự hiện trên trang.</div><% end %>
+  <% when 'projects' %>
+    <div data-role="project-list"></div>
+    <template data-role="project-template">
+      <div class="se-project-pick" data-role="project-item">
+        <span class="se-gallery-index" data-role="project-index"></span>
+        <span class="flex-grow-1 text-truncate" data-role="project-name"></span>
+        <div class="se-field-tools">
+          <button type="button" class="se-icon-btn" title="Đưa lên" data-action="site-editor#moveProjectUp"><i class="fas fa-arrow-up"></i></button>
+          <button type="button" class="se-icon-btn" title="Đưa xuống" data-action="site-editor#moveProjectDown"><i class="fas fa-arrow-down"></i></button>
+          <button type="button" class="se-icon-btn text-danger" title="Bỏ chọn" data-action="site-editor#removeProject"><i class="fas fa-xmark"></i></button>
+        </div>
+      </div>
+    </template>
+    <select class="form-select form-select-sm mt-1" data-role="project-add" data-action="change->site-editor#addProject">
+      <option value="">+ Thêm dự án…</option>
+      <% @projects.each do |p| %><option value="<%= p.id %>"><%= p.name %></option><% end %>
+    </select>
+    <% if field['max'] %><div class="form-text">Tối đa <%= field['max'] %> dự án, theo thứ tự trình chiếu.</div><% end %>
+  <% when 'boolean' %>
+    <div class="form-check form-switch">
+      <input id="<%= input_id %>" class="form-check-input" type="checkbox" role="switch" data-role="input">
+      <label class="form-check-label small" for="<%= input_id %>">Bật</label>
+    </div>
+  <% when 'list' %>
+    <div data-role="items"></div>
+    <template data-role="item-template">
+      <div class="se-list-item" data-role="item">
+        <div class="se-list-item-head">
+          <span><%= field['item_label'] || 'Mục' %> <span data-role="item-index"></span></span>
+          <div class="se-field-tools">
+            <button type="button" class="se-icon-btn" title="Đưa lên" data-action="site-editor#moveItemUp"><i class="fas fa-arrow-up"></i></button>
+            <button type="button" class="se-icon-btn" title="Đưa xuống" data-action="site-editor#moveItemDown"><i class="fas fa-arrow-down"></i></button>
+            <button type="button" class="se-icon-btn text-danger" title="Xóa mục này" data-action="site-editor#removeItem"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <% field['item_fields'].each do |sub| %>
+          <div class="se-sub">
+            <% if sub['type'] == 'boolean' %>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" data-sub="<%= sub['key'] %>" data-sub-type="boolean">
+                <label class="form-check-label"><%= sub['label'] %></label>
+              </div>
+            <% elsif sub['type'] == 'lines' %>
+              <label class="form-label d-block"><%= sub['label'] %></label>
+              <textarea class="form-control form-control-sm" rows="4" data-sub="<%= sub['key'] %>" data-sub-type="lines"></textarea>
+            <% else %>
+              <label class="form-label d-block"><%= sub['label'] %></label>
+              <input type="text" class="form-control form-control-sm" data-sub="<%= sub['key'] %>" data-sub-type="<%= sub['type'] %>">
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </template>
+    <button type="button" class="btn btn-sm btn-outline-primary w-100" data-action="site-editor#addItem">
+      <i class="fas fa-plus"></i> Thêm <%= (field['item_label'] || 'mục').downcase %>
+    </button>
+  <% else %>
+    <input id="<%= input_id %>" type="<%= field['type'] == 'email' ? 'email' : 'text' %>" class="form-control" data-role="input"
+           <%= 'placeholder="https://…"'.html_safe if field['type'] == 'url' %>>
+  <% end %>
+  <% if field['empty_note'].present? %>
+    <div class="se-empty-note"><i class="fas fa-wand-magic-sparkles"></i> <%= field['empty_note'] %></div>
+  <% end %>
+  <div class="se-field-error" data-role="error"></div>
+</div>

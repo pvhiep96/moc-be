@@ -1,0 +1,387 @@
+<style>
+  .studio-demo-browser {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #cbd5e1;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+  }
+
+  .studio-demo-topbar {
+    background: #0f172a;
+    color: #fff;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .studio-demo-header-mock {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+  }
+
+  .studio-demo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 4px;
+  }
+
+  .studio-demo-card {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    background: #1e293b;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    border: 3px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .studio-demo-card:hover {
+    border-color: #38bdf8;
+  }
+
+  .studio-demo-card.is-selected {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+    z-index: 2;
+  }
+
+  .studio-demo-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.35s ease, transform 0.45s ease;
+  }
+
+  .studio-demo-card .hover-img {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .studio-demo-card:hover .hover-img {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+
+  .studio-demo-card-title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 10px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+    color: #E2BA1C;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .studio-photo-tile {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #e2e8f0;
+    background: #0f172a;
+    transition: all 0.15s ease;
+  }
+
+  .studio-photo-tile.is-cover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  }
+
+  .studio-photo-tile.is-hover {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.25);
+  }
+</style>
+
+<!-- Thanh công cụ cố định trên cùng -->
+<div class="sticky-workspace-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
+  <div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-info text-dark fw-bold px-2 py-1">TRANG 2 / 3</span>
+      <h4 class="fw-bold mb-0">🖼️ Quản Lý Trang STUDIO (<code>/studio</code>)</h4>
+    </div>
+    <div class="text-muted small mt-1">
+      Trang <code>/studio</code> hiển thị <strong>Lưới 3 Cột các Dự Án</strong>. Bấm vào <strong>bất kỳ ô dự án nào trên Bản Đồ Demo bên trái</strong> để đổi Ảnh Bìa (#1), Ảnh Hover (#2), Video Dọc hoặc Tên Cặp Đôi!
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center gap-2 flex-wrap">
+    <a href="<%= frontend_url('/studio') %>" target="_blank" rel="noopener" class="btn btn-sm btn-dark fw-semibold">
+      <i class="fas fa-external-link-alt me-1 text-info"></i>Mở Trang STUDIO thật (/studio) ↗
+    </a>
+    <%= link_to new_project_path, class: "btn btn-sm btn-success fw-semibold" do %>
+      <i class="fas fa-plus-circle me-1"></i>+ Thêm Dự Án Mới Vào Lưới Studio
+    <% end %>
+  </div>
+</div>
+
+<!-- SƠ ĐỒ GIẢI THÍCH CẤU TRÚC 1 Ô DỰ ÁN TRÊN TRANG /STUDIO -->
+<div class="card border-0 shadow-sm mb-4 bg-dark text-white">
+  <div class="card-body p-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-3">
+        <span class="badge bg-info text-dark fw-bold mb-1">CẤU TRÚC TRANG /STUDIO</span>
+        <h6 class="fw-bold mb-1">Mỗi ô dự án trên Trang Studio có 3 thành phần:</h6>
+        <div class="small text-white-50">Di chuột thử vào các ô ở Bản Đồ Demo bên dưới để thấy hiệu ứng chuyển từ Ảnh Bìa sang Ảnh Hover!</div>
+      </div>
+      <div class="col-12 col-md-4 col-lg-3">
+        <div class="p-2 px-3 rounded-3 h-100" style="background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.45);">
+          <div class="fw-bold text-warning small">1. ★ Ảnh Bìa Chính (Vị trí #1)</div>
+          <div class="small text-white-50">Hiện mặc định khi khách vừa mở trang <code>/studio</code> (chưa di chuột vào).</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4 col-lg-3">
+        <div class="p-2 px-3 rounded-3 h-100" style="background: rgba(6, 182, 212, 0.14); border: 1px solid rgba(6, 182, 212, 0.45);">
+          <div class="fw-bold text-info small">2. ✦ Ảnh Hover (#2) / 🎬 Video Dọc</div>
+          <div class="small text-white-50">Hiện ngay lập tức khi khách di chuột (Hover) vào ô dự án trên trang <code>/studio</code>.</div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4 col-lg-3">
+        <div class="p-2 px-3 rounded-3 h-100" style="background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.45);">
+          <div class="fw-bold text-success small">3. 🏷️ Tên Cặp Đôi Màu Vàng</div>
+          <div class="small text-white-50">Hiện chữ IN HOA màu vàng ở góc trên bên trái của ô khi khách di chuột vào.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 align-items-start">
+  <!-- =========================================================================
+       CỘT TRÁI: BẢN ĐỒ DEMO TRỰC QUAN TRANG /STUDIO (LƯỚI 3 CỘT)
+       ========================================================================= -->
+  <div class="col-12 col-xl-5">
+    <div class="studio-demo-browser">
+      <div class="studio-demo-topbar">
+        <div class="d-flex gap-1">
+          <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#ef4444;"></span>
+          <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#f59e0b;"></span>
+          <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#22c55e;"></span>
+        </div>
+        <div class="small text-white-50">
+          http://localhost:3000/studio — <strong>BẤM Ô DỰ ÁN ĐỂ SỬA</strong>
+        </div>
+        <span class="badge bg-info text-dark">DEMO /STUDIO</span>
+      </div>
+
+      <!-- SECTION 1 TRÊN /STUDIO: HEADER LOGO & MENU -->
+      <div class="studio-demo-header-mock">
+        <span class="badge bg-secondary-subtle text-secondary" style="font-size: 10px;">SECTION 1: HEADER</span>
+        <span class="fw-bold text-dark" style="letter-spacing: 0.08em; font-size: 13px;">M.O.C PRODUCTIONS</span>
+        <span class="badge bg-dark text-white" style="font-size: 10px;">MENU</span>
+      </div>
+
+      <!-- SECTION 2 TRÊN /STUDIO: LƯỚI 3 CỘT CÁC THẺ DỰ ÁN -->
+      <div class="p-2 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <span class="badge bg-primary" style="font-size: 10px;">
+          SECTION 2: LƯỚI THẺ DỰ ÁN (3 CỘT PC / 2 CỘT MOBILE)
+        </span>
+        <span class="text-muted" style="font-size: 11px;">Rê chuột thử vào ô để xem hiệu ứng Hover!</span>
+      </div>
+
+      <div class="studio-demo-grid">
+        <% @projects.each_with_index do |proj, idx| %>
+          <% disp = proj.displayed_images %>
+          <% cover = disp.first || proj.project_images.first %>
+          <% hover = disp.second || cover %>
+          <% is_sel = (@selected_project && @selected_project.id == proj.id) %>
+
+          <%= link_to studio_manager_projects_path(project_id: proj.id),
+              class: "studio-demo-card #{is_sel ? 'is-selected' : ''}" do %>
+            <% if cover %>
+              <img src="<%= cover.image_url %>" alt="<%= proj.name %>">
+            <% end %>
+            <% if hover %>
+              <img src="<%= hover.image_url %>" class="hover-img" alt="<%= proj.name %> Hover">
+            <% end %>
+
+            <div class="studio-demo-card-title">
+              <%= proj.name %>
+            </div>
+
+            <div class="position-absolute bottom-0 start-0 end-0 p-1 d-flex justify-content-between align-items-center"
+                 style="background: rgba(0,0,0,0.72);">
+              <span class="badge <%= is_sel ? 'bg-warning text-dark' : 'bg-dark text-white' %>" style="font-size: 9px;">
+                Ô #<%= idx + 1 %> <%= is_sel ? '(Đang chọn sửa)' : '— Bấm để sửa' %>
+              </span>
+              <% if proj.show_video %>
+                <span class="badge bg-danger" style="font-size: 8px;">🎬 Video</span>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CỘT PHẢI: CHỈNH SỬA Ô DỰ ÁN ĐANG CHỌN TRÊN TRANG /STUDIO
+       ========================================================================= -->
+  <div class="col-12 col-xl-7">
+    <% if @selected_project %>
+      <% sel_disp = @selected_project.displayed_images %>
+      <% sel_cover = sel_disp.first || @selected_project.project_images.first %>
+      <% sel_hover = sel_disp.second || sel_cover %>
+
+      <div class="card border-warning border-2 mb-4">
+        <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <span class="badge bg-warning text-dark fw-bold me-1">ĐANG CHỌN SỬA Ô DỰ ÁN</span>
+            <strong class="fs-5"><%= @selected_project.name %></strong>
+          </div>
+          <div class="d-flex gap-2">
+            <%= link_to edit_project_path(@selected_project), class: "btn btn-sm btn-success fw-semibold" do %>
+              <i class="fas fa-film me-1"></i>Sang Trang 3: Sửa Trang Chi Tiết Của Dự Án Này →
+            <% end %>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- PHẦN A: XEM TRƯỚC 2 TRẠNG THÁI CỦA Ô DỰ ÁN TRÊN /STUDIO -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+              <div class="p-3 rounded-3 border border-warning bg-warning bg-opacity-10 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="badge bg-warning text-dark fw-bold">TRẠNG THÁI 1: MẶC ĐỊNH (ẢNH BÌA #1)</span>
+                </div>
+                <div class="rounded overflow-hidden bg-dark position-relative" style="aspect-ratio: 4/3;">
+                  <% if sel_cover %>
+                    <img src="<%= sel_cover.image_url %>" class="w-100 h-100" style="object-fit: contain;" alt="">
+                  <% else %>
+                    <div class="d-flex align-items-center justify-content-center h-100 text-white-50 small">Chưa có ảnh</div>
+                  <% end %>
+                </div>
+                <div class="small text-muted mt-2">
+                  Đây là tấm ảnh khách nhìn thấy đầu tiên trên ô dự án ở trang <code>/studio</code> (và cả khung toàn màn hình trên trang <code>/</code>).
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="p-3 rounded-3 border border-info bg-info bg-opacity-10 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="badge bg-info text-dark fw-bold">TRẠNG THÁI 2: KHI RÊ CHUỘT (ẢNH HOVER #2)</span>
+                </div>
+                <div class="rounded overflow-hidden bg-dark position-relative" style="aspect-ratio: 4/3;">
+                  <% if sel_hover %>
+                    <img src="<%= sel_hover.image_url %>" class="w-100 h-100" style="object-fit: contain;" alt="">
+                  <% end %>
+                  <div class="position-absolute top-0 start-0 end-0 p-2"
+                       style="background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);">
+                    <span class="fw-bold text-uppercase" style="color: #E2BA1C; font-size: 13px;">
+                      <%= @selected_project.name %>
+                    </span>
+                  </div>
+                </div>
+                <div class="small text-muted mt-2">
+                  Khi khách rê chuột vào ô, tên cặp đôi màu vàng hiện ra ở góc trên trái và ảnh chuyển sang tấm Hover này!
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PHẦN B: ĐỔI TÊN CẶP ĐÔI & CÀI ĐẶT VIDEO DỌC HOVER -->
+          <%= form_with model: @selected_project, local: true, class: "p-3 rounded-3 bg-light border mb-4" do |f| %>
+            <input type="hidden" name="return_to" value="<%= studio_manager_projects_path(project_id: @selected_project.id) %>">
+            <h6 class="fw-bold mb-3">
+              <i class="fas fa-pen-to-square text-primary me-1"></i>1. Đổi Tên Cặp Đôi & Tùy Chọn Video Dọc Trên Thẻ Studio
+            </h6>
+            <div class="row g-3 align-items-end">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold small mb-1">Tên Cặp Đôi hiển thị trên ô Studio</label>
+                <%= f.text_field :name, class: "form-control fw-bold" %>
+              </div>
+              <div class="col-12 col-md-3">
+                <div class="form-check form-switch pt-2">
+                  <%= f.check_box :show_video, class: "form-check-input", role: "switch" %>
+                  <%= f.label :show_video, "Phát Video Dọc", class: "form-check-label fw-semibold small" %>
+                </div>
+              </div>
+              <div class="col-12 col-md-3 text-end">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                  <i class="fas fa-save me-1"></i>Lưu Tên / Video
+                </button>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- PHẦN C: BẤM 1 CLICK ĐỂ CHỌN ẢNH BÌA (#1) HOẶC ẢNH HOVER (#2) TỪ KHO ẢNH DỰ ÁN -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <h6 class="fw-bold mb-0">
+                  <i class="fas fa-images text-warning me-1"></i>2. Chọn ★ Ảnh Bìa Chính (#1) & ✦ Ảnh Hover (#2) Từ Kho Ảnh (<%= @selected_project.project_images.size %> ảnh)
+                </h6>
+                <div class="small text-muted">
+                  Chỉ cần bấm nút <span class="badge bg-warning text-dark">★ Đặt làm Bìa</span> hoặc <span class="badge bg-info text-dark">✦ Đặt làm Hover</span> bên dưới bất kỳ tấm ảnh nào!
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-2" style="max-height: 580px; overflow-y: auto;">
+              <% all_imgs = @selected_project.displayed_images + (@selected_project.project_images - @selected_project.displayed_images) %>
+              <% all_imgs.each_with_index do |img, idx| %>
+                <% is_cov = (sel_cover && sel_cover.id == img.id) %>
+                <% is_hov = (sel_hover && sel_hover.id == img.id && !is_cov) %>
+
+                <div class="col-6 col-md-4 col-lg-3">
+                  <div class="studio-photo-tile <%= is_cov ? 'is-cover' : (is_hov ? 'is-hover' : '') %>">
+                    <div class="position-relative" style="height: 120px;">
+                      <img src="<%= img.image_url %>" class="w-100 h-100" style="object-fit: cover;" loading="lazy" alt="">
+                      <% if is_cov %>
+                        <span class="position-absolute top-0 start-0 m-1 badge bg-warning text-dark fw-bold" style="font-size: 10px;">
+                          ★ ĐANG LÀ ẢNH BÌA (#1)
+                        </span>
+                      <% elsif is_hov %>
+                        <span class="position-absolute top-0 start-0 m-1 badge bg-info text-dark fw-bold" style="font-size: 10px;">
+                          ✦ ĐANG LÀ ẢNH HOVER (#2)
+                        </span>
+                      <% else %>
+                        <span class="position-absolute top-0 start-0 m-1 badge bg-dark bg-opacity-75" style="font-size: 9px;">
+                          Ảnh #<%= idx + 1 %>
+                        </span>
+                      <% end %>
+                    </div>
+
+                    <div class="p-1 bg-white d-flex gap-1">
+                      <%= button_to quick_set_studio_media_project_path(@selected_project, image_id: img.id, role: 'cover'),
+                          method: :post,
+                          form: { class: "flex-fill" },
+                          class: "btn btn-sm w-100 #{is_cov ? 'btn-warning fw-bold' : 'btn-outline-warning text-dark'} py-1",
+                          style: "font-size: 10px;" do %>
+                        ★ Đặt Bìa
+                      <% end %>
+
+                      <%= button_to quick_set_studio_media_project_path(@selected_project, image_id: img.id, role: 'hover'),
+                          method: :post,
+                          form: { class: "flex-fill" },
+                          class: "btn btn-sm w-100 #{is_hov ? 'btn-info fw-bold' : 'btn-outline-info text-dark'} py-1",
+                          style: "font-size: 10px;" do %>
+                        ✦ Đặt Hover
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

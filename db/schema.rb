@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_11_10_041830) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_22_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_11_10_041830) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "show_video"
+  end
+
+  create_table "site_contents", force: :cascade do |t|
+    t.string "key", null: false
+    t.jsonb "value"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_site_contents_on_key", unique: true
   end
 
   create_table "video_urls", force: :cascade do |t|

@@ -1,31 +1,29 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
   <div>
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><%= link_to 'Home', projects_path %></li>
-        <li class="breadcrumb-item"><%= link_to 'Projects', projects_path %></li>
-        <li class="breadcrumb-item active" aria-current="page">Details</li>
+        <li class="breadcrumb-item"><%= link_to 'Dự án', projects_path %></li>
+        <li class="breadcrumb-item active" aria-current="page"><%= @project.name %></li>
       </ol>
     </nav>
     <h2 class="mt-2 mb-0"><%= @project.name %></h2>
   </div>
-  <div class="d-flex gap-2">
-    <%= link_to edit_project_path(@project), class: 'btn btn-warning' do %>
-      <i class="fas fa-edit me-1"></i> Edit
+  <div class="d-flex gap-2 flex-wrap">
+    <%= link_to manage_content_project_path(@project), class: 'btn btn-primary' do %>
+      <i class="fas fa-sort me-1"></i> Sắp xếp nội dung
     <% end %>
-    <% if @project.respond_to?(:reload_images) %>
-      <%= button_to reload_images_project_path(@project), method: :post, class: 'btn btn-info' do %>
-        <i class="fas fa-sync-alt me-1"></i> Reload Images
-      <% end %>
+    <%= link_to edit_project_path(@project), class: 'btn btn-warning' do %>
+      <i class="fas fa-edit me-1"></i> Chỉnh sửa
+    <% end %>
+    <%= button_to reload_images_project_path(@project), method: :post, class: 'btn btn-outline-info',
+        title: 'Lấy lại danh sách ảnh mới nhất từ thư mục Google Drive' do %>
+      <i class="fas fa-sync-alt me-1"></i> Đồng bộ ảnh
     <% end %>
     <%= button_to project_path(@project),
         method: :delete,
-        class: 'btn btn-danger',
-        form: { data: { turbo_confirm: 'Are you sure you want to delete?' } } do %>
-      <i class="fas fa-trash me-1"></i> Delete
-    <% end %>
-    <%= link_to projects_path, class: 'btn btn-secondary' do %>
-      <i class="fas fa-arrow-left me-1"></i> Back
+        class: 'btn btn-outline-danger',
+        form: { data: { turbo_confirm: delete_project_confirm(@project) } } do %>
+      <i class="fas fa-trash me-1"></i> Xóa
     <% end %>
   </div>
 </div>
@@ -33,31 +31,22 @@
 <div class="row">
   <div class="col-lg-8">
     <div class="card mb-4 shadow-sm border-0">
-      <div class="card-header bg-primary text-white">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <div class="d-flex align-items-center">
-              <p class="mb-0 fw-bold">Drive ID: <code class="text-white"><%= @project.drive_id %></code></p>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="card-body">
         <!-- Tab Navigation -->
         <ul class="nav nav-tabs mb-4" id="projectTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active" id="images-tab" data-bs-toggle="tab" data-bs-target="#images-content" type="button" role="tab" aria-controls="images-content" aria-selected="true">
-              <i class="fas fa-images me-2"></i>Images <span class="badge rounded-pill bg-warning ms-1"><%= @project.images.count rescue 0 %></span>
+              <i class="fas fa-images me-2"></i>Ảnh <span class="badge rounded-pill bg-warning ms-1"><%= @project.project_images.size %></span>
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="videos-tab" data-bs-toggle="tab" data-bs-target="#videos-content" type="button" role="tab" aria-controls="videos-content" aria-selected="false">
-              <i class="fas fa-video me-2"></i>Horizontal Videos <span class="badge rounded-pill bg-info ms-1"><%= @project.video_urls.count %></span>
+              <i class="fas fa-video me-2"></i>Video ngang <span class="badge rounded-pill bg-info ms-1"><%= @project.video_urls.count %></span>
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="vertical-video-tab" data-bs-toggle="tab" data-bs-target="#vertical-video-content" type="button" role="tab" aria-controls="vertical-video-content" aria-selected="false">
-              <i class="fas fa-mobile-alt me-2"></i>Thumbnail Video
+              <i class="fas fa-mobile-alt me-2"></i>Video dọc
               <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
                 <span class="badge rounded-pill bg-success ms-1">1</span>
               <% end %>
@@ -65,32 +54,72 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="descriptions-tab" data-bs-toggle="tab" data-bs-target="#descriptions-content" type="button" role="tab" aria-controls="descriptions-content" aria-selected="false">
-              <i class="fas fa-align-left me-2"></i>Descriptions
+              <i class="fas fa-align-left me-2"></i>Mô tả <span class="badge rounded-pill bg-success ms-1"><%= @project.descriptions.count %></span>
             </button>
           </li>
         </ul>
 
         <div class="tab-content" id="projectTabContent">
-          <!-- Images Tab Content -->
+          <!-- Tab Ảnh -->
           <div class="tab-pane fade show active" id="images-content" role="tabpanel" aria-labelledby="images-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="mb-0">Selected images to display</h6>
-              <div>
-                <%= link_to manage_content_project_path(@project), class: 'btn btn-sm btn-outline-info' do %>
-                  <i class="fas fa-sort me-1"></i> Manage display order
-                <% end %>
-              </div>
+              <h6 class="mb-0">
+                Đang hiển thị <strong><%= @project.displayed_images.size %></strong> /
+                tổng <strong><%= @project.project_images.size %></strong> ảnh đã đồng bộ
+              </h6>
+              <%= link_to manage_content_project_path(@project), class: 'btn btn-sm btn-outline-primary' do %>
+                <i class="fas fa-sort me-1"></i> Chọn ảnh & sắp thứ tự
+              <% end %>
             </div>
 
             <% if @project.displayed_images.present? %>
               <div class="row g-3">
-                <% @project.displayed_images.each_with_index do |image, index| %>
+                <% @project.displayed_images.each do |image| %>
                   <div class="col-md-4 col-sm-6">
                     <div class="card h-100">
-                      <img src="<%= image.image_url %>" class="card-img-top" alt="Project image">
-                      <div class="card-footer">
-                        <a href="<%= image.image_url %>" target="_blank" class="btn btn-sm btn-outline-primary d-block">
-                          <i class="fas fa-external-link-alt me-1"></i> View
+                      <img src="<%= image.image_url %>" class="card-img-top" alt="Ảnh dự án" loading="lazy">
+                      <div class="card-footer p-2">
+                        <a href="<%= image.image_url %>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary d-block">
+                          <i class="fas fa-external-link-alt me-1"></i> Xem ảnh gốc
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% elsif @project.project_images.any? %>
+              <div class="alert alert-warning">
+                <i class="fas fa-triangle-exclamation me-2"></i>
+                Đã đồng bộ <%= @project.project_images.size %> ảnh từ Drive nhưng <strong>chưa chọn ảnh nào để hiển thị</strong> trên website.
+                Vào <%= link_to "Sắp xếp nội dung", manage_content_project_path(@project), class: "alert-link" %> để chọn ảnh.
+              </div>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Chưa có ảnh nào.
+                <% if @project.drive_id.present? %>
+                  Kiểm tra thư mục <a href="<%= google_drive_folder_url(@project.drive_id) %>" target="_blank" rel="noopener" class="alert-link">Google Drive</a>
+                  đã có ảnh và được chia sẻ cho tài khoản hệ thống, sau đó bấm <strong>Đồng bộ ảnh</strong>.
+                <% else %>
+                  Hãy thêm Drive ID trong phần <%= link_to "Chỉnh sửa", edit_project_path(@project), class: "alert-link" %>.
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Tab Video ngang -->
+          <div class="tab-pane fade" id="videos-content" role="tabpanel" aria-labelledby="videos-tab">
+            <% if @project.video_urls.any? %>
+              <div class="row g-3">
+                <% @project.video_urls.each do |video_url| %>
+                  <div class="col-md-6">
+                    <div class="card h-100">
+                      <% if (thumb = youtube_thumbnail_url(video_url.url)) %>
+                        <img src="<%= thumb %>" class="card-img-top" alt="Thumbnail video" loading="lazy">
+                      <% end %>
+                      <div class="card-footer p-2 d-flex justify-content-between align-items-center">
+                        <span class="small text-truncate me-2"><%= youtube_url(video_url.url) %></span>
+                        <a href="<%= youtube_url(video_url.url) %>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary flex-shrink-0">
+                          <i class="fas fa-play me-1"></i>Mở
                         </a>
                       </div>
                     </div>
@@ -99,45 +128,19 @@
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No images have been added yet.
+                <i class="fas fa-info-circle me-2"></i> Chưa có video ngang nào.
+                Thêm link YouTube trong phần <%= link_to "Chỉnh sửa", edit_project_path(@project), class: "alert-link" %>.
               </div>
             <% end %>
           </div>
 
-          <!-- Horizontal Videos Tab Content -->
-          <div class="tab-pane fade" id="videos-content" role="tabpanel" aria-labelledby="videos-tab">
-            <% if @project.video_urls.any? %>
-              <div class="list-group">
-                <% @project.video_urls.each do |video_url| %>
-                  <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="d-flex align-items-center flex-grow-1">
-                        <i class="fas fa-video me-3 text-danger"></i>
-                        <div class="text-break">
-                          <%= youtube_url(video_url.url) %>
-                        </div>
-                      </div>
-                      <a href="<%= youtube_url(video_url.url) %>" target="_blank" class="btn btn-sm btn-outline-primary ms-3">
-                        <i class="fas fa-external-link-alt"></i> Open
-                      </a>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No Video URLs have been added yet.
-              </div>
-            <% end %>
-          </div>
-
-          <!-- Thumbnail Video Tab Content -->
+          <!-- Tab Video dọc -->
           <div class="tab-pane fade" id="vertical-video-content" role="tabpanel" aria-labelledby="vertical-video-tab">
             <% if @project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record? %>
               <div class="card mb-3">
                 <div class="card-header bg-success text-white">
                   <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0"><i class="fas fa-file-video me-2"></i>Uploaded Video File</h6>
+                    <h6 class="mb-0"><i class="fas fa-file-video me-2"></i>File video đã tải lên</h6>
                     <span class="badge bg-light text-dark">
                       <%= number_to_human_size(@project.video_vertical.video_file.byte_size) %>
                     </span>
@@ -146,20 +149,20 @@
                 <div class="card-body">
                   <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                      <small class="text-muted">File name: <strong><%= @project.video_vertical.video_file.filename %></strong></small>
-                      <small class="text-muted">Format: <%= @project.video_vertical.video_file.content_type %></small>
+                      <small class="text-muted">Tên file: <strong><%= @project.video_vertical.video_file.filename %></strong></small>
+                      <small class="text-muted">Định dạng: <%= @project.video_vertical.video_file.content_type %></small>
                     </div>
                     <div class="d-flex justify-content-between">
-                      <small class="text-muted">Uploaded: <%= time_ago_in_words(@project.video_vertical.video_file.created_at) %> ago</small>
+                      <small class="text-muted">Tải lên: <%= @project.video_vertical.video_file.created_at.strftime("%d/%m/%Y %H:%M") %></small>
                       <a href="<%= url_for(@project.video_vertical.video_file) %>" download class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-download me-1"></i> Download
+                        <i class="fas fa-download me-1"></i> Tải xuống
                       </a>
                     </div>
                   </div>
-                  <div class="ratio ratio-9x16">
+                  <div class="ratio ratio-9x16" style="max-width: 280px;">
                     <video controls class="w-100">
                       <source src="<%= url_for(@project.video_vertical.video_file) %>" type="<%= @project.video_vertical.video_file.content_type %>">
-                      Your browser does not support the video tag.
+                      Trình duyệt không hỗ trợ phát video.
                     </video>
                   </div>
                 </div>
@@ -174,40 +177,49 @@
                         <%= youtube_url(@project.video_vertical.url) %>
                       </div>
                     </div>
-                    <a href="<%= youtube_url(@project.video_vertical.url) %>" target="_blank" class="btn btn-sm btn-outline-primary ms-3">
-                      <i class="fas fa-external-link-alt"></i> Open
+                    <a href="<%= youtube_url(@project.video_vertical.url) %>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary ms-3">
+                      <i class="fas fa-play me-1"></i> Mở
                     </a>
                   </div>
                 </div>
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No Thumbnail Video has been added yet.
+                <i class="fas fa-info-circle me-2"></i> Chưa có video dọc.
+                Thêm trong phần <%= link_to "Chỉnh sửa", edit_project_path(@project), class: "alert-link" %> (mục Video dọc).
+              </div>
+            <% end %>
+
+            <% unless @project.show_video %>
+              <div class="alert alert-secondary mt-2">
+                <i class="fas fa-eye-slash me-2"></i>Hiển thị video dọc đang <strong>tắt</strong> — video sẽ không phát trên trang chủ.
+                Bật lại trong phần <%= link_to "Chỉnh sửa", edit_project_path(@project), class: "alert-link" %>.
               </div>
             <% end %>
           </div>
 
-          <!-- Descriptions Tab Content -->
+          <!-- Tab Mô tả -->
           <div class="tab-pane fade" id="descriptions-content" role="tabpanel" aria-labelledby="descriptions-tab">
-            <% if @project.descriptions.order(:position_display).any? %>
+            <% if @project.descriptions.any? %>
               <div class="descriptions-list">
-                <% @project.descriptions.order(:position_display).each do |description| %>
+                <% @project.descriptions.each_with_index do |description, index| %>
                   <div class="card mb-3">
                     <div class="card-header bg-light">
                       <div class="d-flex align-items-center">
-                        <span class="badge bg-primary me-2"><%= description.position_display %></span>
-                        <h6 class="mb-0">Description content</h6>
+                        <span class="badge bg-primary me-2"><%= index + 1 %></span>
+                        <h6 class="mb-0">Mô tả</h6>
                       </div>
                     </div>
                     <div class="card-body">
-                      <%= description.content.html_safe %>
+                      <%= sanitize description.content %>
                     </div>
                   </div>
                 <% end %>
               </div>
             <% else %>
               <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i> No descriptions have been added yet.
+                <i class="fas fa-info-circle me-2"></i> Chưa có mô tả nào.
+                Thêm trong phần <%= link_to "Chỉnh sửa", edit_project_path(@project), class: "alert-link" %>.
               </div>
             <% end %>
           </div>
@@ -218,37 +230,57 @@
 
   <div class="col-lg-4">
     <div class="card mb-4 shadow-sm border-0">
-      <div class="card-header bg-info text-white">
-        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Project Information</h5>
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-circle-info me-2 text-info"></i>Thông tin dự án</h5>
       </div>
       <div class="card-body">
         <ul class="list-group list-group-flush">
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-id-card me-2"></i>ID:</span>
-            <span class="badge bg-secondary"><%= @project.id %></span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-video me-2"></i>Video URLs:</span>
-            <span class="badge bg-info rounded-pill"><%= @project.video_urls.count %></span>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-mobile-alt me-2"></i>Thumbnail Video:</span>
-            <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
-              <span class="badge bg-success rounded-pill">Active</span>
+            <span><i class="fab fa-google-drive me-2 text-danger"></i>Thư mục ảnh:</span>
+            <% if @project.drive_id.present? %>
+              <a href="<%= google_drive_folder_url(@project.drive_id) %>" target="_blank" rel="noopener" class="small">
+                Mở Drive <i class="fas fa-external-link-alt ms-1"></i>
+              </a>
             <% else %>
-              <span class="badge bg-secondary rounded-pill">Inactive</span>
+              <span class="badge bg-warning text-dark">Chưa gắn</span>
             <% end %>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-file-alt me-2"></i>Descriptions:</span>
+            <span><i class="fas fa-images me-2"></i>Ảnh hiển thị:</span>
+            <span class="badge bg-warning rounded-pill"><%= @project.displayed_images.size %> / <%= @project.project_images.size %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-video me-2"></i>Video ngang:</span>
+            <span class="badge bg-info rounded-pill"><%= @project.video_urls.count %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-mobile-alt me-2"></i>Video dọc:</span>
+            <% if @project.video_vertical&.url.present? || (@project.video_vertical&.video_file&.attached? && !@project.video_vertical.video_file.blob.new_record?) %>
+              <span class="badge <%= @project.show_video ? 'bg-success' : 'bg-secondary' %> rounded-pill">
+                <%= @project.show_video ? 'Đang bật' : 'Đang tắt' %>
+              </span>
+            <% else %>
+              <span class="badge bg-secondary rounded-pill">Chưa có</span>
+            <% end %>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-file-alt me-2"></i>Mô tả:</span>
             <span class="badge bg-success rounded-pill"><%= @project.descriptions.count %></span>
           </li>
-          <% if @project.respond_to?(:images) %>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><i class="fas fa-images me-2"></i>Images:</span>
-              <span class="badge bg-warning rounded-pill"><%= @project.images.count rescue 0 %></span>
-            </li>
-          <% end %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-clock me-2"></i>Ngày tạo:</span>
+            <span class="text-muted small"><%= @project.created_at.strftime("%d/%m/%Y") %></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body small text-muted">
+        <p class="mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i><strong>Mẹo:</strong></p>
+        <ul class="ps-3 mb-0">
+          <li>Thêm/xóa ảnh bằng cách chỉnh trong thư mục Google Drive rồi bấm <em>Đồng bộ ảnh</em>.</li>
+          <li>Ảnh/video/mô tả chỉ xuất hiện trên website sau khi được chọn trong <em>Sắp xếp nội dung</em>.</li>
         </ul>
       </div>
     </div>
